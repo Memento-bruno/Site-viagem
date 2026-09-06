@@ -4,7 +4,7 @@
    dos Grisões e das Dolomitas o sinal cai, e roaming na Suíça é caro.
    ===================================================================== */
 
-const VERSAO = '2026-v1';
+const VERSAO = '2026-v2';
 const CACHE  = `roteiro-${VERSAO}`;
 
 /* Arquivos próprios: sempre em cache, atualizados em segundo plano. */
@@ -62,13 +62,23 @@ self.addEventListener('fetch', e => {
   const mesmaOrigem = url.origin === self.location.origin;
   if (!mesmaOrigem && !cacheavel(url)) return;   // deixa passar o que não nos interessa
 
-  /* Navegação: serve o cache na hora (abre offline) e revalida atrás. */
+  /* Navegação: REDE PRIMEIRO, cache como reserva.
+     Um roteiro que muda precisa mostrar a versão nova assim que ela existe.
+     Com cache primeiro, quem já tinha aberto o site ficava preso na versão
+     antiga — o preço de 3 segundos de espera é menor que o de ler um número
+     desatualizado. Offline, a reserva entra na hora. */
   if (req.mode === 'navigate') {
     e.respondWith((async () => {
       const cache = await caches.open(CACHE);
-      const guardado = await cache.match('./index.html');
-      const rede = fetch(req).then(r => { if (r && r.ok) cache.put('./index.html', r.clone()); return r; }).catch(() => null);
-      return guardado || (await rede) || new Response('Offline e sem cópia local.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      try {
+        const rede = await Promise.race([
+          fetch(req),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('lento')), 3500))
+        ]);
+        if (rede && rede.ok) { cache.put('./index.html', rede.clone()); return rede; }
+      } catch {}
+      return (await cache.match('./index.html'))
+          || new Response('Offline e sem cópia local.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
     })());
     return;
   }

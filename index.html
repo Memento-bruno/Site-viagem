@@ -916,92 +916,134 @@ const PHOTOS = {
  }
 };
 
-/* --- Custos por dia, em euros. Modelo de duas escalas:
-       pp  = por pessoa   (alimentação, ingressos, transporte público)
-       car = do carro     (combustível, pedágio, vinheta, estacionamento) — valor único
-       sh  = do casal     (taxa turística do hotel + diversos do dia)
+/* --- Custos por dia, em euros.
+
+   ALIMENTAÇÃO é o total DO CASAL: a soma da opção vegana com a onívora de cada
+   refeição, tirada dos preços que estão nos próprios cartões de restaurante.
+   Não foi ajustada para caber no teto — o teto de € 50 por pessoa é um limite a
+   vigiar, e o site avisa quando o dia passa dele.
+
+   INGRESSOS e TRANSPORTE são por pessoa e multiplicam por PESSOAS.
+   COMBUSTÍVEL, PEDÁGIO, VINHETA e ESTACIONAMENTO são do carro: valor único.
+   TAXA e DIVERSOS são do casal.
+
    Combustível: Jeep Avenger 1.2 turbo (Alamo), 6,8 L/100 km reais em rota
-   alpina com bagagem, ao preço médio da gasolina de cada país. --- */
+   alpina com bagagem, ao preço da gasolina de cada país. --- */
 const CUSTOS = {
  '10/09': { km:0, pais:'ES',
-   pp:{ alim:22, ingr:0, transp:11 },
-   car:{ comb:0.0, ped:0, vinh:0, estac:0 },
-   sh:{ taxa:0, taxaTxt:'€ 0', div:31, divNota:'eSIM europeu € 25 · água e café € 6' } },
+   alim:{ cafe:0, almoco:0, jantar:25, inc:false },
+   ingr:0, transp:11,
+   comb:0.0, ped:0, vinh:0, estac:0,
+   taxa:0, taxaTxt:'€ 0', div:31, divNota:'eSIM europeu € 25 · água e café € 6' },
  '11/09': { km:0, pais:'ES',
-   pp:{ alim:44, ingr:18, transp:5 },
-   car:{ comb:0.0, ped:0, vinh:0, estac:0 },
-   sh:{ taxa:0, taxaTxt:'€ 0', div:8, divNota:'água, café e banheiros' } },
+   alim:{ cafe:14.5, almoco:35.5, jantar:45.5, inc:false },
+   ingr:18, transp:5,
+   comb:0.0, ped:0, vinh:0, estac:0,
+   taxa:0, taxaTxt:'€ 0', div:8, divNota:'água, café e banheiros' },
  '12/09': { km:97, pais:'IT',
-   pp:{ alim:42, ingr:9, transp:11 },
-   car:{ comb:12.2, ped:8, vinh:0, estac:4 },
-   sh:{ taxa:8, taxaTxt:'R$ 48', div:8, divNota:'água e café na estrada' } },
+   alim:{ cafe:0, almoco:39, jantar:52, inc:false },
+   ingr:9, transp:11,
+   comb:12.2, ped:8, vinh:0, estac:4,
+   taxa:8, taxaTxt:'R$ 48', div:8, divNota:'água e café na estrada' },
  '13/09': { km:113, pais:'IT',
-   pp:{ alim:45, ingr:30, transp:0 },
-   car:{ comb:14.2, ped:0, vinh:0, estac:8 },
-   sh:{ taxa:4, taxaTxt:'R$ 24', div:8, divNota:'água, café, banheiros de posto' } },
+   alim:{ cafe:0, almoco:56.5, jantar:41, inc:true },
+   ingr:30, transp:0,
+   comb:14.2, ped:0, vinh:0, estac:8,
+   taxa:4, taxaTxt:'R$ 24', div:8, divNota:'água, café, banheiros de posto' },
  '14/09': { km:146, pais:'CH',
-   pp:{ alim:48, ingr:10, transp:0 },
-   car:{ comb:19.4, ped:0, vinh:42, estac:6 },
-   sh:{ taxa:12, taxaTxt:'R$ 72', div:10, divNota:'água e café (Suíça é cara)' } },
+   alim:{ cafe:0, almoco:55.1, jantar:59.9, inc:true },
+   ingr:10, transp:0,
+   comb:19.4, ped:0, vinh:42, estac:6,
+   taxa:12, taxaTxt:'R$ 72', div:10, divNota:'água e café (Suíça é cara)' },
  '15/09': { km:167, pais:'CH',
-   pp:{ alim:50, ingr:26, transp:0 },
-   car:{ comb:22.1, ped:0, vinh:0, estac:30 },
-   sh:{ taxa:12, taxaTxt:'R$ 72', div:10, divNota:'garagem do hotel já em estacionamento' } },
+   alim:{ cafe:0, almoco:38.9, jantar:67.7, inc:true },
+   ingr:26, transp:0,
+   comb:22.1, ped:0, vinh:0, estac:30,
+   taxa:12, taxaTxt:'R$ 72', div:10, divNota:'garagem do hotel já em estacionamento' },
  '16/09': { km:108, pais:'AT',
-   pp:{ alim:44, ingr:15, transp:0 },
-   car:{ comb:12.1, ped:0, vinh:12, estac:3 },
-   sh:{ taxa:4, taxaTxt:'R$ 24', div:8, divNota:'água e café' } },
+   alim:{ cafe:0, almoco:55.7, jantar:39.5, inc:true },
+   ingr:15, transp:0,
+   comb:12.1, ped:0, vinh:12, estac:3,
+   taxa:4, taxaTxt:'R$ 24', div:8, divNota:'água e café' },
  '17/09': { km:464, pais:'AT',
-   pp:{ alim:46, ingr:0, transp:0 },
-   car:{ comb:52.1, ped:23, vinh:0, estac:3 },
-   sh:{ taxa:4, taxaTxt:'R$ 24', div:12, divNota:'dia longo: café, banheiros, lanche' } },
+   alim:{ cafe:0, almoco:67.7, jantar:40, inc:true },
+   ingr:0, transp:0,
+   comb:52.1, ped:23, vinh:0, estac:3,
+   taxa:4, taxaTxt:'R$ 24', div:12, divNota:'dia longo: café, banheiros, lanche' },
  '18/09': { km:194, pais:'IT',
-   pp:{ alim:46, ingr:22, transp:0 },
-   car:{ comb:24.4, ped:0, vinh:0, estac:14 },
-   sh:{ taxa:8, taxaTxt:'R$ 48', div:10, divNota:'café em rifugio' } },
+   alim:{ cafe:0, almoco:44, jantar:56, inc:true },
+   ingr:22, transp:0,
+   comb:24.4, ped:0, vinh:0, estac:14,
+   taxa:8, taxaTxt:'R$ 48', div:10, divNota:'café em rifugio' },
  '19/09': { km:205, pais:'AT',
-   pp:{ alim:44, ingr:13, transp:0 },
-   car:{ comb:23.0, ped:30, vinh:0, estac:0 },
-   sh:{ taxa:6, taxaTxt:'R$ 36', div:25, divNota:'café no rifugio € 10 · farmácia/imprevistos € 15' } },
+   alim:{ cafe:0, almoco:38, jantar:42, inc:true },
+   ingr:13, transp:0,
+   comb:23.0, ped:30, vinh:0, estac:0,
+   taxa:6, taxaTxt:'R$ 36', div:25, divNota:'café no rifugio € 10 · farmácia/imprevistos € 15' },
  '20/09': { km:140, pais:'SI',
-   pp:{ alim:42, ingr:65, transp:0 },
-   car:{ comb:14.8, ped:8, vinh:16, estac:6 },
-   sh:{ taxa:8, taxaTxt:'R$ 48', div:26, divNota:'lavanderia € 18 · água e café € 8' } },
+   alim:{ cafe:0, almoco:44, jantar:33, inc:true },
+   ingr:65, transp:0,
+   comb:14.8, ped:8, vinh:16, estac:6,
+   taxa:8, taxaTxt:'R$ 48', div:26, divNota:'lavanderia € 18 · água e café € 8' },
  '21/09': { km:59, pais:'SI',
-   pp:{ alim:40, ingr:61, transp:0 },
-   car:{ comb:6.2, ped:0, vinh:0, estac:15 },
-   sh:{ taxa:8, taxaTxt:'R$ 48', div:8, divNota:'água e café' } },
+   alim:{ cafe:0, almoco:22, jantar:40, inc:true },
+   ingr:61, transp:0,
+   comb:6.2, ped:0, vinh:0, estac:15,
+   taxa:8, taxaTxt:'R$ 48', div:8, divNota:'água e café' },
  '22/09': { km:232, pais:'HR',
-   pp:{ alim:38, ingr:24, transp:0 },
-   car:{ comb:24.5, ped:12, vinh:0, estac:6 },
-   sh:{ taxa:4, taxaTxt:'R$ 24', div:8, divNota:'água e café' } },
+   alim:{ cafe:0, almoco:43.5, jantar:42.5, inc:true },
+   ingr:24, transp:0,
+   comb:24.5, ped:12, vinh:0, estac:6,
+   taxa:4, taxaTxt:'R$ 24', div:8, divNota:'água e café' },
  '23/09': { km:335, pais:'IT',
-   pp:{ alim:42, ingr:12, transp:0 },
-   car:{ comb:42.1, ped:11, vinh:0, estac:8 },
-   sh:{ taxa:8, taxaTxt:'R$ 48', div:12, divNota:'dia de estrada: café e banheiros' } },
+   alim:{ cafe:0, almoco:40, jantar:42, inc:true },
+   ingr:12, transp:0,
+   comb:42.1, ped:11, vinh:0, estac:8,
+   taxa:8, taxaTxt:'R$ 48', div:12, divNota:'dia de estrada: café e banheiros' },
  '24/09': { km:0, pais:'IT',
-   pp:{ alim:48, ingr:43, transp:12 },
-   car:{ comb:0.0, ped:0, vinh:0, estac:0 },
-   sh:{ taxa:8, taxaTxt:'R$ 48', div:10, divNota:'água em Veneza (cara) e café' } },
+   alim:{ cafe:0, almoco:42, jantar:39, inc:true },
+   ingr:43, transp:12,
+   comb:0.0, ped:0, vinh:0, estac:0,
+   taxa:8, taxaTxt:'R$ 48', div:10, divNota:'água em Veneza (cara) e café' },
  '25/09': { km:302, pais:'IT',
-   pp:{ alim:44, ingr:32, transp:0 },
-   car:{ comb:38.0, ped:21, vinh:0, estac:8 },
-   sh:{ taxa:10, taxaTxt:'R$ 60', div:8, divNota:'água e café' } },
+   alim:{ cafe:0, almoco:42, jantar:48.5, inc:true },
+   ingr:32, transp:0,
+   comb:38.0, ped:21, vinh:0, estac:8,
+   taxa:10, taxaTxt:'R$ 60', div:8, divNota:'água e café' },
  '26/09': { km:65, pais:'IT',
-   pp:{ alim:42, ingr:5, transp:8 },
-   car:{ comb:8.2, ped:6, vinh:0, estac:10 },
-   sh:{ taxa:10, taxaTxt:'R$ 60', div:48, divNota:'lembranças € 40 · água e café € 8' } },
+   alim:{ cafe:0, almoco:45, jantar:41, inc:true },
+   ingr:5, transp:8,
+   comb:8.2, ped:6, vinh:0, estac:10,
+   taxa:10, taxaTxt:'R$ 60', div:48, divNota:'lembranças € 40 · água e café € 8' },
  '27/09': { km:0, pais:'ES',
-   pp:{ alim:42, ingr:0, transp:11 },
-   car:{ comb:0.0, ped:0, vinh:0, estac:0 },
-   sh:{ taxa:0, taxaTxt:'€ 0', div:8, divNota:'água e café' } },
+   alim:{ cafe:19.5, almoco:33.5, jantar:37.0, inc:false },
+   ingr:0, transp:11,
+   comb:0.0, ped:0, vinh:0, estac:0,
+   taxa:0, taxaTxt:'€ 0', div:8, divNota:'água e café' },
  '28/09': { km:0, pais:'ES',
-   pp:{ alim:45, ingr:35, transp:12 },
-   car:{ comb:0.0, ped:0, vinh:0, estac:0 },
-   sh:{ taxa:0, taxaTxt:'€ 0', div:40, divNota:'guarda-volumes € 8 · lembranças € 30 · água € 2' } }
+   alim:{ cafe:17.5, almoco:61.0, jantar:0, inc:false },
+   ingr:35, transp:12,
+   comb:0.0, ped:0, vinh:0, estac:0,
+   taxa:0, taxaTxt:'€ 0', div:40, divNota:'guarda-volumes € 8 · lembranças € 30 · água € 2' }
 };
 
-const PESSOAS = 2;            // viajantes; multiplica apenas o bloco 'pp'
+const PESSOAS = 2;
+const TETO_ALIM = 50;   // € por pessoa/dia: limite que você definiu, não previsão
+
+/* As oito categorias, em ordem fixa. A cor segue a categoria, nunca o valor:
+   um dia barato em ingressos não repinta as outras faixas. Paleta categórica
+   validada para fundo escuro (banda de luminosidade, piso de croma, separação
+   para daltonismo e contraste). */
+const CATEGORIAS = [
+  { id:'alim',   rot:'Alimentação',        ic:'fa-utensils',         cor:'#3987e5' },
+  { id:'ingr',   rot:'Ingressos e atrações',ic:'fa-ticket',          cor:'#d95926' },
+  { id:'comb',   rot:'Combustível',        ic:'fa-gas-pump',         cor:'#199e70' },
+  { id:'ped',    rot:'Pedágios e vinhetas',ic:'fa-road',             cor:'#c98500' },
+  { id:'estac',  rot:'Estacionamento',     ic:'fa-square-parking',   cor:'#d55181' },
+  { id:'transp', rot:'Transporte público', ic:'fa-train-subway',     cor:'#008300' },
+  { id:'taxa',   rot:'Taxa turística',     ic:'fa-receipt',          cor:'#9085e9' },
+  { id:'div',    rot:'Diversos',           ic:'fa-basket-shopping',  cor:'#e66767' }
+];
 
 /* --- Dicas culturais / idioma, reaproveitadas por país --- */
 const TIPS = {
@@ -1176,7 +1218,7 @@ const DAYS = [
 
 /* ============================ 10/09 ============================ */
 {
-  id:'d10', date:'10/09', dow:'Quarta', n:1, sr:'07:52', ss:'20:35',
+  id:'d10', date:'10/09', dow:'Quarta', n:1, tmax:30, tmin:14, tamp:[27,34], sr:'07:52', ss:'20:35',
   title:'Chegada em Madrid', sub:'Voo BR 06h45 › MAD 21h55 · noite de aclimatação',
   country:'Espanha', flag:'🇪🇸', base:'Madrid', park:'madrid', tips:'es',
   hotel:{ n:'Íbis Budget Madrid Puente de Vallecas', c:'Madrid', bf:false, tax:'€ 0', q:'Ibis Budget Madrid Puente de Vallecas' },
@@ -1207,7 +1249,7 @@ const DAYS = [
 
 /* ============================ 11/09 ============================ */
 {
-  id:'d11', date:'11/09', dow:'Quinta', n:2, sr:'07:53', ss:'20:33',
+  id:'d11', date:'11/09', dow:'Quinta', n:2, tmax:30, tmin:15, tamp:[25,35], sr:'07:53', ss:'20:33',
   title:'Madrid clássica, de oeste a leste', sub:'Debod › Palácio Real › Plaza Mayor › Sol › Gran Vía › Cibeles',
   country:'Espanha', flag:'🇪🇸', base:'Madrid', park:'madrid', tips:'es',
   hotel:{ n:'Íbis Budget Madrid Puente de Vallecas', c:'Madrid', bf:false, tax:'€ 0', q:'Ibis Budget Madrid Puente de Vallecas' },
@@ -1249,7 +1291,7 @@ const DAYS = [
 
 /* ============================ 12/09 ============================ */
 {
-  id:'d12', date:'12/09', dow:'Sexta', n:3, sr:'06:59', ss:'19:44',
+  id:'d12', date:'12/09', dow:'Sexta', n:3, tmax:19, tmin:12, tamp:[14,23], sr:'06:59', ss:'19:44',
   title:'Madrid › Milão › Lago de Como', sub:'Voo 09h55 · retirada do carro · tarde e noite em Como',
   country:'Itália', flag:'🇮🇹', base:'Albavilla (Como)', park:'como', tips:'it',
   hotel:{ n:'Albavilla Hotel & Co.', c:'Albavilla · Como', bf:true, tax:'R$ 48', q:'Albavilla Hotel and Co Albavilla Como' },
@@ -1290,7 +1332,7 @@ const DAYS = [
 
 /* ============================ 13/09 ============================ */
 {
-  id:'d13', date:'13/09', dow:'Sábado', n:4, sr:'06:59', ss:'19:41',
+  id:'d13', date:'13/09', dow:'Sábado', n:4, tmax:19, tmin:12, tamp:[13,23], sr:'06:59', ss:'19:41',
   title:'Braço leste do Lago de Como + Varenna', sub:'Vezio › Villa Monastero › Villa Cipressi › Abbazia di Piona › Sondrio',
   country:'Itália', flag:'🇮🇹', base:'Sondrio (Valtellina)', park:'como', tips:'it',
   hotel:{ n:'La Brace — Hotel Ristorante Bar', c:'Valtellina · Sondrio', bf:true, tax:'R$ 24', q:'La Brace Hotel Ristorante Forcola Sondrio' },
@@ -1330,7 +1372,7 @@ const DAYS = [
 
 /* ============================ 14/09 ============================ */
 {
-  id:'d14', date:'14/09', dow:'Domingo', n:5, sr:'06:59', ss:'19:39',
+  id:'d14', date:'14/09', dow:'Domingo', n:5, tmax:15, tmin:8, tamp:[4,20], sr:'06:59', ss:'19:39',
   title:'Val Masino › Passo Splügen › Viamala › Churwalden', sub:'Trilha alpina leve e a estrada mais cênica da viagem',
   country:'Suíça', flag:'🇨🇭', base:'Churwalden (Grisões)', park:'suica', tips:'de',
   hotel:{ n:'Hotel Krone — Aktiv & Erholt', c:'Churwalden · Suíça', bf:true, tax:'R$ 72', q:'Hotel Krone Churwalden' },
@@ -1370,7 +1412,7 @@ const DAYS = [
 
 /* ============================ 15/09 ============================ */
 {
-  id:'d15', date:'15/09', dow:'Segunda', n:6, sr:'07:04', ss:'19:41',
+  id:'d15', date:'15/09', dow:'Segunda', n:6, tmax:20, tmin:11, tamp:[14,23], sr:'07:04', ss:'19:41',
   title:'Churwalden › Lindt Home of Chocolate › Zurique', sub:'CHECKPOINT: fábrica da Lindt + tarde na cidade velha',
   country:'Suíça', flag:'🇨🇭', base:'Zurique', park:'suica', tips:'de',
   hotel:{ n:'The Gate Boutique Hotel Zürich', c:'Zurique · Suíça', bf:true, tax:'R$ 72', q:'The Gate Boutique Hotel Zurich' },
@@ -1407,7 +1449,7 @@ const DAYS = [
 
 /* ============================ 16/09 ============================ */
 {
-  id:'d16', date:'16/09', dow:'Terça', n:7, sr:'07:01', ss:'19:34',
+  id:'d16', date:'16/09', dow:'Terça', n:7, tmax:15, tmin:8, tamp:[7,23], sr:'07:01', ss:'19:34',
   title:'Zurique › Walensee › Feldkirch › Laterns', sub:'Manhã na cidade, tarde alpina e entrada na Áustria',
   country:'Áustria', flag:'🇦🇹', base:'Laterns (Vorarlberg)', park:'austria', tips:'de',
   hotel:{ n:'JUFA Hotel Laterns — Klangholzhus', c:'Laterns · Feldkirch', bf:true, tax:'R$ 24', q:'JUFA Hotel Laterns Klangholzhus'},
@@ -1447,7 +1489,7 @@ const DAYS = [
 
 /* ============================ 17/09 ============================ */
 {
-  id:'d17', date:'17/09', dow:'Quarta', n:8, sr:'06:54', ss:'19:24',
+  id:'d17', date:'17/09', dow:'Quarta', n:8, tmax:14, tmin:3, tamp:[8,20], sr:'06:54', ss:'19:24',
   title:'Vaduz às 10h07 (Revolução Solar) › Innsbruck › Val di Fassa', sub:'O dia mais crítico e mais longo do roteiro',
   country:'Liechtenstein → Itália', flag:'🇱🇮', base:'Pera di Fassa (Trentino)', park:'vaduz', tips:'de',
   hotel:{ n:'Mason Marmoleda', c:'Pera di Fassa · Trentino', bf:true, tax:'R$ 24', q:'Mason Marmoleda Pera di Fassa' },
@@ -1489,7 +1531,7 @@ const DAYS = [
 
 /* ============================ 18/09 ============================ */
 {
-  id:'d18', date:'18/09', dow:'Quinta', n:9, sr:'06:54', ss:'19:20',
+  id:'d18', date:'18/09', dow:'Quinta', n:9, tmax:15, tmin:4, tamp:[11,20], sr:'06:54', ss:'19:20',
   title:'Grande Estrada das Dolomitas + Lago di Braies', sub:'Passo Pordoi › Falzarego › Cortina › Braies ao entardecer',
   country:'Itália', flag:'🇮🇹', base:'Cortina d\'Ampezzo', park:'dolomitas', tips:'it',
   hotel:{ n:'Hotel Des Alpes', c:'Cortina d\'Ampezzo', bf:true, tax:'R$ 48', q:'Hotel Des Alpes Cortina d Ampezzo' },
@@ -1499,7 +1541,8 @@ const DAYS = [
     {l:'ok',   t:'CHECKPOINT: natureza bruta das Dolomitas — Lago di Braies hoje, Tre Cime amanhã.'},
     {l:'ok',   t:'Café da manhã incluso. Taxa turística de hoje (Des Alpes): R$ 48.'},
     {l:'warn', t:'Passos alpinos: Pordoi (2.239 m) e Falzarego (2.105 m) têm dezenas de curvas em rampa. Use marcha reduzida na descida para poupar freio.'},
-    {l:'info', t:'Parking do Lago di Braies: € 6–8/h. Passo Pordoi: € 2–3/h. Tenha euros em espécie por garantia.'}
+    {l:'info', t:'Parking do Lago di Braies: € 6–8/h. Passo Pordoi: € 2–3/h. Tenha euros em espécie por garantia.'},
+    {l:'warn', t:'🌡 A média mostrada é do vale. No Passo Pordoi (2.239 m) e no teleférico do Sass Pordoi (2.950 m) faça a conta: cerca de 6°C a menos por 1.000 m de subida, mais vento.'}
   ],
   transport:[
     'Pera › Canazei › Passo Pordoi › Arabba › Passo Falzarego › Cortina: 1h50 de estrada de montanha pura (só 75 km, mas curvas constantes).',
@@ -1530,13 +1573,14 @@ const DAYS = [
 
 /* ============================ 19/09 ============================ */
 {
-  id:'d19', date:'19/09', dow:'Sexta', n:10, sr:'06:48', ss:'19:11',
+  id:'d19', date:'19/09', dow:'Sexta', n:10, tmax:19, tmin:10, tamp:[14,23], sr:'06:48', ss:'19:11',
   title:'Tre Cime di Lavaredo › Lienz › Villach', sub:'A trilha mais icônica das Dolomitas e a travessia para a Áustria',
   country:'Áustria', flag:'🇦🇹', base:'Villach (Caríntia)', park:'austria', tips:'de',
   hotel:{ n:'Dietrichsteinerhof Apartments & Rooms', c:'Villach · Caríntia', bf:true, tax:'R$ 36', q:'Dietrichsteinerhof Villach' },
   drive:200, walk:8,
   alerts:[
     {l:'danger', t:'ESTRADA DAS TRE CIME (Auronzo): pedágio de € 30 por carro, cobrado na cancela. Chegue até 08h30 — depois disso o parking do Rifugio Auronzo lota e a estrada pode ser fechada.'},
+    {l:'warn', t:'🌡 A média de 19°C é do vale. No Rifugio Auronzo, a 2.320 m, tire uns 12°C disso: espere 6 a 10°C com vento. A medição por satélite não enxerga o topo da montanha.'},
     {l:'ok',   t:'CHECKPOINT CUMPRIDO: Tre Cime di Lavaredo hoje, fluindo para Villach via Lienz.'},
     {l:'ok',   t:'Café da manhã incluso. Taxa turística de hoje (Dietrichsteinerhof): R$ 36.'},
     {l:'warn', t:'A 2.400 m faz frio mesmo em setembro (5–12 °C, vento). Leve corta-vento, gorro e água — não há sombra nem abrigo no trecho aberto.'},
@@ -1570,7 +1614,7 @@ const DAYS = [
 
 /* ============================ 20/09 ============================ */
 {
-  id:'d20', date:'20/09', dow:'Sábado', n:11, sr:'06:49', ss:'19:08',
+  id:'d20', date:'20/09', dow:'Sábado', n:11, tmax:20, tmin:9, tamp:[14,25], sr:'06:49', ss:'19:08',
   title:'Dia inteiro no Lago Bled', sub:'Vintgar › Mala Osojnica › volta ao lago › Straža › Castelo · noite em Liubliana',
   country:'Eslovênia', flag:'🇸🇮', base:'Liubliana', park:'liubliana', tips:'sl',
   hotel:{ n:'Holiday Inn Express Ljubljana', c:'Liubliana', bf:true, tax:'R$ 48', q:'Holiday Inn Express Ljubljana' },
@@ -1612,7 +1656,7 @@ const DAYS = [
 
 /* ============================ 21/09 ============================ */
 {
-  id:'d21', date:'21/09', dow:'Domingo', n:12, sr:'06:48', ss:'19:04',
+  id:'d21', date:'21/09', dow:'Domingo', n:12, tmax:20, tmin:10, tamp:[15,24], sr:'06:48', ss:'19:04',
   title:'Postojna, Predjama e Liubliana inteira', sub:'Caverna e castelo na rocha pela manhã · capital à tarde e à noite',
   country:'Eslovênia', flag:'🇸🇮', base:'Liubliana', park:'liubliana', tips:'sl',
   hotel:{ n:'Holiday Inn Express Ljubljana', c:'Liubliana', bf:true, tax:'R$ 48', q:'Holiday Inn Express Ljubljana' },
@@ -1652,7 +1696,7 @@ const DAYS = [
 
 /* ============================ 22/09 ============================ */
 {
-  id:'d22', date:'22/09', dow:'Segunda', n:13, sr:'06:52', ss:'19:05',
+  id:'d22', date:'22/09', dow:'Segunda', n:13, tmax:23, tmin:17, tamp:[19,25], sr:'06:52', ss:'19:05',
   title:'Ístria e Pula', sub:'Rovinj no caminho · Arena, Templo de Augusto, Kaštel e enseada Mužilj',
   country:'Croácia', flag:'🇭🇷', base:'Pula', park:'pula', tips:'hr',
   hotel:{ n:'Artena Hotel', c:'Pula · Ístria', bf:true, tax:'R$ 24', q:'Artena Hotel Pula' },
@@ -1693,7 +1737,7 @@ const DAYS = [
 
 /* ============================ 23/09 ============================ */
 {
-  id:'d23', date:'23/09', dow:'Terça', n:14, sr:'07:00', ss:'19:09',
+  id:'d23', date:'23/09', dow:'Terça', n:14, tmax:23, tmin:18, tamp:[22,26], sr:'07:00', ss:'19:09',
   title:'Costa da Ístria › Piran › Trieste › Mestre', sub:'Dia de estrada cênica pelo alto Adriático',
   country:'Itália', flag:'🇮🇹', base:'Mestre (Veneza)', park:'mestre', tips:'it',
   hotel:{ n:'Hotel Antico Moro', c:'Mestre · Veneza', bf:true, tax:'R$ 48', q:'Hotel Antico Moro Mestre' },
@@ -1734,7 +1778,7 @@ const DAYS = [
 
 /* ============================ 24/09 ============================ */
 {
-  id:'d24', date:'24/09', dow:'Quarta', n:15, sr:'07:01', ss:'19:07',
+  id:'d24', date:'24/09', dow:'Quarta', n:15, tmax:22, tmin:18, tamp:[20,24], sr:'07:01', ss:'19:07',
   title:'Veneza inteira, de trem a partir de Mestre', sub:'San Marco › Ducal › Rialto › Dorsoduro · pôr do sol no Parco San Giuliano',
   country:'Itália', flag:'🇮🇹', base:'Mestre (Veneza)', park:'mestre', tips:'it',
   hotel:{ n:'Hotel Antico Moro', c:'Mestre · Veneza', bf:true, tax:'R$ 48', q:'Hotel Antico Moro Mestre' },
@@ -1775,7 +1819,7 @@ const DAYS = [
 
 /* ============================ 25/09 ============================ */
 {
-  id:'d25', date:'25/09', dow:'Quinta', n:16, sr:'07:15', ss:'19:18',
+  id:'d25', date:'25/09', dow:'Quinta', n:16, tmax:21, tmin:12, tamp:[18,25], sr:'07:15', ss:'19:18',
   title:'Mestre › Verona › Milão', sub:'Última travessia longa · Duomo de Milão ao entardecer',
   country:'Itália', flag:'🇮🇹', base:'Milão', park:'milao', tips:'it',
   hotel:{ n:'Admiral Hotel', c:'Milão', bf:true, tax:'R$ 60', q:'Admiral Hotel Milano' },
@@ -1813,7 +1857,7 @@ const DAYS = [
 
 /* ============================ 26/09 ============================ */
 {
-  id:'d26', date:'26/09', dow:'Sexta', n:17, sr:'07:18', ss:'19:18',
+  id:'d26', date:'26/09', dow:'Sexta', n:17, tmax:21, tmin:13, tamp:[16,26], sr:'07:18', ss:'19:18',
   title:'Castello Sforzesco, Sempione e devolução do carro', sub:'Último dia italiano · noite na região do aeroporto MXP',
   country:'Itália', flag:'🇮🇹', base:'Malpensa (MXP)', park:'aeroporto', tips:'it',
   hotel:{ n:'Hotel na região do Aeroporto MXP', c:'Malpensa · Milão', bf:true, tax:'R$ 60', q:'hotel Malpensa Airport Milano' },
@@ -1852,7 +1896,7 @@ const DAYS = [
 
 /* ============================ 27/09 ============================ */
 {
-  id:'d27', date:'27/09', dow:'Sábado', n:18, sr:'08:08', ss:'20:06',
+  id:'d27', date:'27/09', dow:'Sábado', n:18, tmax:25, tmin:10, tamp:[21,28], sr:'08:08', ss:'20:06',
   title:'MXP › Madrid · Retiro e Vallecas', sub:'Voo 06h40 · Palácio de Cristal, roseiral e loja do Rayo',
   country:'Espanha', flag:'🇪🇸', base:'Madrid', park:'madrid', tips:'es',
   hotel:{ n:'InHome MADRID CENTRO', c:'Madrid', bf:false, tax:'€ 0', q:'InHome Madrid Centro' },
@@ -1895,7 +1939,7 @@ const DAYS = [
 
 /* ============================ 28/09 ============================ */
 {
-  id:'d28', date:'28/09', dow:'Domingo', n:19, sr:'08:09', ss:'20:04',
+  id:'d28', date:'28/09', dow:'Domingo', n:19, tmax:23, tmin:10, tamp:[21,28], sr:'08:09', ss:'20:04',
   title:'Bernabéu, últimos passos e voo de volta', sub:'Partida de Madrid às 23h15 · chegada no Brasil às 05h00',
   country:'Espanha', flag:'🇪🇸', base:'Madrid → Brasil', park:'madrid', tips:'es',
   hotel:{ n:'Sem pernoite — voo noturno a partir do Aeroporto MAD', c:'Madrid · Barajas', bf:false, tax:'€ 0', q:'Aeropuerto Adolfo Suarez Madrid Barajas T1' },
@@ -1959,14 +2003,43 @@ function setCambio(v){
 const eur = v => '€ ' + Math.round(v).toLocaleString('pt-BR');
 const brl = v => 'R$ ' + Math.round(v*cambio).toLocaleString('pt-BR');
 
-/* Custos de um dia já resolvidos: por pessoa, do carro, do casal e total. */
+/* Custos de um dia, resolvidos por categoria e já com o número de viajantes
+   aplicado onde ele muda o valor. */
 function custosDo(d){
   const c = CUSTOS[d.date];
   if (!c) return null;
-  const pp    = c.pp.alim + c.pp.ingr + c.pp.transp;
-  const car   = c.car.comb + c.car.ped + c.car.vinh + c.car.estac;
-  const casal = c.sh.taxa + c.sh.div;
-  return { c, pp, car, casal, total: pp*PESSOAS + car + casal };
+  const alim = c.alim.cafe + c.alim.almoco + c.alim.jantar;   // já é do casal
+  const cat = {
+    alim,
+    ingr:   c.ingr   * PESSOAS,
+    comb:   c.comb,
+    ped:    c.ped + c.vinh,          // pedágios e vinhetas na mesma categoria
+    estac:  c.estac,
+    transp: c.transp * PESSOAS,
+    taxa:   c.taxa,
+    div:    c.div
+  };
+  const total = Object.values(cat).reduce((a,b)=>a+b, 0);
+  return {
+    c, cat, total,
+    alimPorPessoa: alim / PESSOAS,
+    estourou: (alim / PESSOAS) > TETO_ALIM,
+    carro: c.comb + c.ped + c.vinh + c.estac
+  };
+}
+
+/* Soma da viagem inteira, por categoria. */
+function totaisViagem(){
+  const cat = {}; CATEGORIAS.forEach(x => cat[x.id] = 0);
+  let total = 0, km = 0, estouros = 0;
+  DAYS.forEach(d => {
+    const k = custosDo(d); if (!k) return;
+    CATEGORIAS.forEach(x => cat[x.id] += k.cat[x.id]);
+    total += k.total; km += k.c.km; if (k.estourou) estouros++;
+  });
+  return { cat, total, km, estouros,
+           drive: DAYS.reduce((s,d)=>s+d.drive,0),
+           walk:  DAYS.reduce((s,d)=>s+d.walk,0) };
 }
 
 const toMin = t => { const [h,m] = String(t||'').split(':').map(Number); return (h*60 + (m||0)); };
@@ -2052,32 +2125,33 @@ function renderNavs(){
 }
 
 /* ---------------- Totais da viagem ---------------- */
-function totaisViagem(){
-  let pp = 0, car = 0, casal = 0, km = 0, comb = 0;
-  DAYS.forEach(d => {
-    const k = custosDo(d); if (!k) return;
-    pp += k.pp; car += k.car; casal += k.casal; km += k.c.km; comb += k.c.car.comb;
-  });
-  return { pp, car, casal, km, comb, total: pp*PESSOAS + car + casal,
-           drive: DAYS.reduce((s,d)=>s+d.drive,0), walk: DAYS.reduce((s,d)=>s+d.walk,0) };
-}
-
 function renderTotals(){
   const t = totaisViagem();
-  const cells = [
-    ['fa-wallet','Total (2 pessoas)', eur(t.total), brl(t.total),'text-amber-300'],
-    ['fa-user','Por pessoa', eur(t.pp), brl(t.pp),'text-sky-300'],
-    ['fa-car','Do carro', eur(t.car), brl(t.car),'text-emerald-300'],
-    ['fa-basket-shopping','Do casal', eur(t.casal), brl(t.casal),'text-rose-300'],
-    ['fa-gas-pump','Combustível', eur(t.comb), t.km.toLocaleString('pt-BR')+' km','text-emerald-300'],
-    ['fa-person-walking','A pé', Math.round(t.walk)+' km', fmtDrive(t.drive)+' de estrada','text-teal-300']
-  ];
-  $('#tripTotals').innerHTML = cells.map(([i,l,v,sub,c])=>`
+  const pct = v => Math.round(v / t.total * 100) + '%';
+  const topo = `
+    <div class="col-span-2 glass-soft rounded-xl p-2.5">
+      <div class="text-[10px] text-white/50 flex items-center gap-1"><i class="fa-solid fa-wallet text-amber-300"></i>Total · ${PESSOAS} pessoas</div>
+      <div class="font-display font-extrabold text-lg mt-0.5">${eur(t.total)}</div>
+      <div class="text-[10px] text-white/45">${brl(t.total)} · ${eur(t.total/DAYS.length)}/dia</div>
+      <div class="flex gap-[2px] h-1.5 rounded-full overflow-hidden mt-2">
+        ${CATEGORIAS.filter(x=>t.cat[x.id]>0).map(x=>`<div style="width:${(t.cat[x.id]/t.total*100).toFixed(2)}%;background:${x.cor}" title="${x.rot}"></div>`).join('')}
+      </div>
+    </div>`;
+  const cats = CATEGORIAS.filter(x => t.cat[x.id] > 0).map(x => `
     <div class="glass-soft rounded-xl p-2.5">
-      <div class="text-[10px] text-white/50 flex items-center gap-1"><i class="fa-solid ${i} ${c}"></i>${l}</div>
-      <div class="font-display font-bold text-sm mt-0.5">${v}</div>
-      <div class="text-[9.5px] text-white/40">${sub}</div>
+      <div class="text-[10px] text-white/50 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-[2px] shrink-0" style="background:${x.cor}"></span>${x.rot}
+      </div>
+      <div class="font-display font-bold text-sm mt-0.5">${eur(t.cat[x.id])}</div>
+      <div class="text-[9.5px] text-white/40">${brl(t.cat[x.id])} · ${pct(t.cat[x.id])}</div>
     </div>`).join('');
+  const rodape = `
+    <div class="col-span-2 glass-soft rounded-xl p-2.5">
+      <div class="text-[10px] text-white/50 flex items-center gap-1"><i class="fa-solid fa-route text-teal-300"></i>Percurso</div>
+      <div class="text-[11px] text-white/75 mt-0.5">${t.km.toLocaleString('pt-BR')} km · ${fmtDrive(t.drive)} de estrada · ${Math.round(t.walk)} km a pé</div>
+      ${t.estouros ? `<div class="text-[10px] text-amber-300/90 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> ${t.estouros} dias acima do teto de alimentação</div>` : ''}
+    </div>`;
+  $('#tripTotals').innerHTML = topo + cats + rodape;
   $('#hdrDrive').textContent = fmtDrive(t.drive)+' de estrada';
   $('#hdrBudget').textContent = eur(t.total) + ' · ' + brl(t.total);
 }
@@ -2273,6 +2347,10 @@ function renderDay(i){
           <span class="chip !py-1"><i class="fa-solid fa-calendar-day text-sky-300"></i>Dia ${d.n} de 19</span>
           <span class="chip !py-1">${d.flag} ${d.country}</span>
           <span class="chip !py-1"><i class="fa-solid fa-location-dot text-rose-300"></i>${d.base}</span>
+          <span class="chip !py-1" title="Média das máximas e mínimas desta data nos últimos 4 anos (2022–2025), medida por satélite (NASA POWER). Não é previsão — é o que costuma fazer.">
+            <i class="fa-solid fa-temperature-half text-orange-300"></i>${d.tmax}° / ${d.tmin}°
+            <span class="text-white/40">média 4 anos</span>
+          </span>
           <span class="chip !py-1" title="Luz natural disponível neste dia">
             <i class="fa-solid fa-sun text-amber-300"></i>${d.sr}
             <i class="fa-solid fa-arrow-right text-white/30 text-[8px]"></i>
@@ -2290,8 +2368,8 @@ function renderDay(i){
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mt-4">
       ${metricCard('fa-wallet','Gasto do dia (2 pessoas)', eur(k.total), brl(k.total),'text-amber-300')}
-      ${metricCard('fa-user','Por pessoa', eur(k.pp), brl(k.pp) + ' · comida, ingressos e transporte','text-sky-300')}
-      ${metricCard('fa-car','Do carro', eur(k.car), k.car ? brl(k.car) + ' · ' + k.c.km + ' km' : 'Carro parado hoje','text-emerald-300')}
+      ${metricCard('fa-utensils','Alimentação', eur(k.cat.alim), eur(k.alimPorPessoa) + '/pessoa · teto ' + eur(TETO_ALIM) + (k.estourou ? ' ⚠' : ' ✓'), k.estourou ? 'text-amber-300' : 'text-sky-300')}
+      ${metricCard('fa-car','Do carro', eur(k.carro), k.carro ? brl(k.carro) + ' · ' + k.c.km + ' km' : 'Carro parado hoje','text-emerald-300')}
       ${metricCard('fa-person-walking','Caminhada', d.walk+' km', fmtDrive(d.drive) + ' de estrada','text-teal-300')}
     </div>
   </section>`;
@@ -2320,25 +2398,69 @@ function renderDay(i){
     <div class="btn-map sm:hidden mt-3 w-full justify-center"><i class="fa-solid fa-location-dot"></i>Abrir hotel no Google Maps</div>
   </a>`;
 
-  /* Gastos do dia, detalhados */
-  const linha = (icone, cor, rotulo, valorEur, nota, porPessoa) => valorEur <= 0 ? '' : `
-    <div class="flex items-center gap-3 py-2">
-      <i class="fa-solid ${icone} ${cor} w-4 text-center shrink-0"></i>
-      <div class="min-w-0 flex-1">
-        <div class="text-[12.5px] text-white/85 leading-snug">${rotulo}
-          ${porPessoa ? `<span class="text-[10px] text-white/40">× ${PESSOAS} pessoas</span>` : ''}</div>
-        ${nota ? `<div class="text-[10.5px] text-white/40 leading-snug">${nota}</div>` : ''}
-      </div>
-      <div class="text-right shrink-0">
-        <div class="text-[13px] font-semibold tabular-nums">${eur(porPessoa ? valorEur*PESSOAS : valorEur)}</div>
-        <div class="text-[10.5px] text-white/45 tabular-nums">${brl(porPessoa ? valorEur*PESSOAS : valorEur)}</div>
-      </div>
+  /* Gastos do dia, por categoria */
+  const catsDoDia = CATEGORIAS.map(x => ({ ...x, valor: k.cat[x.id] })).filter(x => x.valor > 0);
+
+  /* Barra de proporção: uma faixa por categoria, com 2px de respiro entre elas.
+     É leitura secundária — a identidade vem do rótulo na lista abaixo, nunca só
+     da cor. */
+  const barra = `<div class="flex gap-[2px] h-2.5 rounded-full overflow-hidden mb-4" role="img"
+       aria-label="Proporção das categorias no gasto do dia">
+    ${catsDoDia.map(x => `<div style="width:${(x.valor/k.total*100).toFixed(2)}%;background:${x.cor}"
+         title="${x.rot}: ${eur(x.valor)} (${Math.round(x.valor/k.total*100)}%)"></div>`).join('')}
+  </div>`;
+
+  const subLinha = (rot, v) => v <= 0 ? '' : `
+    <div class="flex items-center justify-between text-[11px] text-white/45 pl-7 py-0.5">
+      <span>${rot}</span><span class="tabular-nums">${eur(v)}</span>
     </div>`;
+
+  const catLinha = x => {
+    const pct = Math.round(x.valor / k.total * 100);
+    const nota = {
+      alim:   k.c.alim.inc ? 'Café da manhã incluso no hotel' : '',
+      ingr:   `€ ${k.c.ingr} por pessoa × ${PESSOAS}`,
+      comb:   `${k.c.km} km · 6,8 L/100 km · gasolina ${k.c.pais}`,
+      ped:    k.c.vinh > 0 ? `Inclui vinheta de ${eur(k.c.vinh)}, cobrada uma vez` : '',
+      transp: `€ ${k.c.transp} por pessoa × ${PESSOAS}`,
+      taxa:   `${k.c.taxaTxt} conforme informado`,
+      div:    k.c.divNota
+    }[x.id] || '';
+    return `
+    <div class="py-2">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-[3px] shrink-0" style="background:${x.cor}"></span>
+        <i class="fa-solid ${x.ic} text-white/45 text-[11px] w-4 text-center shrink-0"></i>
+        <div class="min-w-0 flex-1">
+          <div class="text-[12.5px] text-white/88 leading-snug">${x.rot}</div>
+          ${nota ? `<div class="text-[10.5px] text-white/40 leading-snug">${nota}</div>` : ''}
+        </div>
+        <div class="text-right shrink-0">
+          <div class="text-[13px] font-semibold tabular-nums">${eur(x.valor)}</div>
+          <div class="text-[10.5px] text-white/45 tabular-nums">${brl(x.valor)} · ${pct}%</div>
+        </div>
+      </div>
+      ${x.id === 'alim' ? `
+        ${subLinha(k.c.alim.inc ? 'Café da manhã (incluso)' : 'Café da manhã', k.c.alim.cafe)}
+        ${subLinha('Almoço — vegano + onívoro', k.c.alim.almoco)}
+        ${subLinha('Jantar — vegano + onívoro', k.c.alim.jantar)}` : ''}
+    </div>`;
+  };
+
+  const alerta = k.estourou ? `
+    <div class="flex gap-2.5 items-start rounded-xl px-3 py-2.5 mb-3"
+         style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4)">
+      <i class="fa-solid fa-triangle-exclamation text-amber-300 mt-0.5 shrink-0"></i>
+      <span class="text-[12px] leading-relaxed text-white/85">
+        Alimentação em <strong>${eur(k.alimPorPessoa)} por pessoa</strong> — acima do seu teto de ${eur(TETO_ALIM)}.
+        Trocar o jantar por algo mais simples devolve a diferença.
+      </span>
+    </div>` : '';
 
   const gastos = `<section class="glass rounded-3xl p-4 md:p-5 fade-up">
     <div class="flex items-start justify-between gap-3 mb-1">
       <h3 class="font-display font-bold text-sm flex items-center gap-2">
-        <i class="fa-solid fa-receipt text-amber-300"></i>Gastos do dia
+        <i class="fa-solid fa-chart-pie text-amber-300"></i>Gastos do dia por categoria
       </h3>
       <div class="text-right">
         <div class="font-display font-extrabold text-lg leading-none">${eur(k.total)}</div>
@@ -2346,26 +2468,9 @@ function renderDay(i){
       </div>
     </div>
     <p class="text-[11px] text-white/45 mb-3">Para ${PESSOAS} pessoas. Hotéis, voos e diária do carro não entram — já estão contratados.</p>
-
-    <div class="divider mb-1"></div>
-    <div class="text-[10px] uppercase tracking-wide text-white/40 mt-2.5 mb-0.5">Por pessoa</div>
-    ${linha('fa-utensils','text-amber-300','Alimentação', k.c.pp.alim, 'Teto de € 50 por pessoa/dia', true)}
-    ${linha('fa-ticket','text-violet-300','Ingressos e atrações', k.c.pp.ingr, '', true)}
-    ${linha('fa-train-subway','text-cyan-300','Transporte público', k.c.pp.transp, 'Metrô, trem, teleférico, vaporetto', true)}
-
-    ${k.car > 0 ? `
-      <div class="divider my-1"></div>
-      <div class="text-[10px] uppercase tracking-wide text-white/40 mt-2.5 mb-0.5">Do carro — Jeep Avenger (valor único)</div>
-      ${linha('fa-gas-pump','text-emerald-300','Combustível', k.c.car.comb, k.c.km + ' km · 6,8 L/100 km · gasolina ' + k.c.pais, false)}
-      ${linha('fa-road','text-emerald-300','Pedágios', k.c.car.ped, '', false)}
-      ${linha('fa-id-card','text-emerald-300','Vinheta', k.c.car.vinh, 'Cobrança única, vale a viagem toda', false)}
-      ${linha('fa-square-parking','text-emerald-300','Estacionamento', k.c.car.estac, '', false)}
-    ` : ''}
-
-    <div class="divider my-1"></div>
-    <div class="text-[10px] uppercase tracking-wide text-white/40 mt-2.5 mb-0.5">Do casal</div>
-    ${linha('fa-receipt','text-rose-300','Taxa turística do hotel', k.c.sh.taxa, k.c.sh.taxaTxt + ' conforme informado', false)}
-    ${linha('fa-basket-shopping','text-slate-300','Diversos', k.c.sh.div, k.c.sh.divNota, false)}
+    ${alerta}
+    ${barra}
+    <div class="divide-y divide-white/6">${catsDoDia.map(catLinha).join('')}</div>
 
     <div class="divider my-2"></div>
     <div class="flex items-center justify-between pt-1">
@@ -2380,17 +2485,28 @@ function renderDay(i){
       <i class="fa-solid fa-right-left text-white/35 text-[11px]"></i>
       <label for="taxaCambio" class="text-[11px] text-white/50">Câmbio R$ por € 1</label>
       <input id="taxaCambio" type="number" step="0.01" min="0.1" value="${cambio.toFixed(2)}"
-             class="w-20 bg-white/8 border border-white/15 rounded-lg px-2 py-1 text-[12px] tabular-nums focus:outline-none focus:border-sky-400/60">
+             class="w-20 rounded-lg px-2 py-1 text-[12px] tabular-nums focus:outline-none focus:border-sky-400/60"
+             style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#e7ecf7;color-scheme:dark">
       <span class="text-[10px] text-white/35 flex-1">Ajuste e todos os valores em real se atualizam</span>
     </div>
   </section>`;
 
   /* Alertas */
+  /* Alertas gerados a partir da temperatura média, para não depender de eu ter
+     lembrado de escrever um aviso em cada dia. */
+  const alertasClima = [];
+  if (d.tmin <= 6) alertasClima.push({ l:'warn',
+    t:`🌡 Mínima média de ${d.tmin}°C nesta data. Corta-vento e uma camada térmica saem da mala hoje — a máxima de ${d.tmax}°C engana, o frio chega no fim da tarde.` });
+  if (d.tmax >= 28) alertasClima.push({ l:'warn',
+    t:`🌡 Máxima média de ${d.tmax}°C. Leve água e evite as horas centrais ao ar livre — nos últimos 4 anos esta data chegou a ${d.tamp[1]}°C.` });
+  if (d.walk >= 12) alertasClima.push({ l:'info',
+    t:`Dia de ${d.walk} km a pé com máxima média de ${d.tmax}°C: calçado confortável e uma garrafa reutilizável poupam dinheiro e desconforto.` });
+
   const alerts = `<section class="glass rounded-3xl p-4 md:p-5 fade-up">
     <h3 class="font-display font-bold text-sm flex items-center gap-2 mb-3">
       <i class="fa-solid fa-bell text-amber-300"></i>Alertas e atenções do dia
     </h3>
-    <ul class="space-y-2">${d.alerts.map(alertRow).join('')}</ul>
+    <ul class="space-y-2">${[...d.alerts, ...alertasClima].map(alertRow).join('')}</ul>
   </section>`;
 
   /* Timeline agrupada por período */
