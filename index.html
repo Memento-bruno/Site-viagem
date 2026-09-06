@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b1120">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Roteiro 2026">
 <title>Roteiro Europa 2026 — Madrid · Alpes · Dolomitas · Adriático</title>
 <meta name="description" content="Itinerário interativo dia a dia: Espanha, Itália, Suíça, Áustria, Liechtenstein, Eslovênia e Croácia — 10/09 a 28/09.">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -195,6 +201,14 @@ if (window.tailwind) tailwind.config = {
           10 &rarr; 28 set · 19 dias · 7 países · Madrid ao Adriático
         </p>
       </div>
+      <button id="btnHoje" class="tap chip !px-3 hover:bg-white/10 border-white/15 hidden" title="Ir para o dia de hoje">
+        <i class="fa-solid fa-location-crosshairs text-emerald-300"></i>
+        <span class="hidden sm:inline">Hoje</span>
+      </button>
+      <button id="btnOffline" class="tap chip !px-3 hover:bg-white/10 border-white/15" title="Baixar tudo para usar sem internet">
+        <i class="fa-solid fa-cloud-arrow-down text-violet-300"></i>
+        <span class="hidden sm:inline">Offline</span>
+      </button>
       <button id="btnOverview" class="tap chip !px-3 hover:bg-white/10 border-white/15" title="Visão geral da viagem">
         <i class="fa-solid fa-layer-group text-sky-300"></i>
         <span class="hidden sm:inline">Visão geral</span>
@@ -202,6 +216,21 @@ if (window.tailwind) tailwind.config = {
       <div class="hidden lg:flex items-center gap-2">
         <span class="chip"><i class="fa-solid fa-car text-emerald-300"></i><span id="hdrDrive">—</span></span>
         <span class="chip"><i class="fa-solid fa-euro-sign text-amber-300"></i><span id="hdrBudget">—</span></span>
+      </div>
+    </div>
+
+    <!-- Progresso da preparação offline -->
+    <div id="offlineBar" class="hidden pb-3">
+      <div class="glass-soft rounded-xl px-3 py-2.5">
+        <div class="flex items-center gap-2 text-[11px] mb-2">
+          <i class="fa-solid fa-cloud-arrow-down text-violet-300"></i>
+          <span id="offlineMsg" class="flex-1 text-white/80">Preparando para uso offline…</span>
+          <button id="offlineClose" class="text-white/40 hover:text-white/80 px-1" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
+          <div id="offlineFill" class="h-full rounded-full transition-all duration-300"
+               style="width:0%;background:linear-gradient(90deg,#a78bfa,#38bdf8)"></div>
+        </div>
       </div>
     </div>
 
@@ -1059,7 +1088,7 @@ const DAYS = [
 
 /* ============================ 10/09 ============================ */
 {
-  id:'d10', date:'10/09', dow:'Quarta', n:1,
+  id:'d10', date:'10/09', dow:'Quarta', n:1, sr:'07:52', ss:'20:35',
   title:'Chegada em Madrid', sub:'Voo BR 06h45 › MAD 21h55 · noite de aclimatação',
   country:'Espanha', flag:'🇪🇸', base:'Madrid', park:'madrid', tips:'es',
   hotel:{ n:'Íbis Budget Madrid Puente de Vallecas', c:'Madrid', bf:false, tax:'€ 0', q:'Ibis Budget Madrid Puente de Vallecas' },
@@ -1090,7 +1119,7 @@ const DAYS = [
 
 /* ============================ 11/09 ============================ */
 {
-  id:'d11', date:'11/09', dow:'Quinta', n:2,
+  id:'d11', date:'11/09', dow:'Quinta', n:2, sr:'07:53', ss:'20:33',
   title:'Madrid clássica, de oeste a leste', sub:'Debod › Palácio Real › Plaza Mayor › Sol › Gran Vía › Cibeles',
   country:'Espanha', flag:'🇪🇸', base:'Madrid', park:'madrid', tips:'es',
   hotel:{ n:'Íbis Budget Madrid Puente de Vallecas', c:'Madrid', bf:false, tax:'€ 0', q:'Ibis Budget Madrid Puente de Vallecas' },
@@ -1132,7 +1161,7 @@ const DAYS = [
 
 /* ============================ 12/09 ============================ */
 {
-  id:'d12', date:'12/09', dow:'Sexta', n:3,
+  id:'d12', date:'12/09', dow:'Sexta', n:3, sr:'06:59', ss:'19:44',
   title:'Madrid › Milão › Lago de Como', sub:'Voo 09h55 · retirada do carro · tarde e noite em Como',
   country:'Itália', flag:'🇮🇹', base:'Albavilla (Como)', park:'como', tips:'it',
   hotel:{ n:'Albavilla Hotel & Co.', c:'Albavilla · Como', bf:true, tax:'R$ 48', q:'Albavilla Hotel and Co Albavilla Como' },
@@ -1173,7 +1202,7 @@ const DAYS = [
 
 /* ============================ 13/09 ============================ */
 {
-  id:'d13', date:'13/09', dow:'Sábado', n:4,
+  id:'d13', date:'13/09', dow:'Sábado', n:4, sr:'06:59', ss:'19:41',
   title:'Braço leste do Lago de Como + Varenna', sub:'Vezio › Villa Monastero › Villa Cipressi › Abbazia di Piona › Sondrio',
   country:'Itália', flag:'🇮🇹', base:'Sondrio (Valtellina)', park:'como', tips:'it',
   hotel:{ n:'La Brace — Hotel Ristorante Bar', c:'Valtellina · Sondrio', bf:true, tax:'R$ 24', q:'La Brace Hotel Ristorante Forcola Sondrio' },
@@ -1213,7 +1242,7 @@ const DAYS = [
 
 /* ============================ 14/09 ============================ */
 {
-  id:'d14', date:'14/09', dow:'Domingo', n:5,
+  id:'d14', date:'14/09', dow:'Domingo', n:5, sr:'06:59', ss:'19:39',
   title:'Val Masino › Passo Splügen › Viamala › Churwalden', sub:'Trilha alpina leve e a estrada mais cênica da viagem',
   country:'Suíça', flag:'🇨🇭', base:'Churwalden (Grisões)', park:'suica', tips:'de',
   hotel:{ n:'Hotel Krone — Aktiv & Erholt', c:'Churwalden · Suíça', bf:true, tax:'R$ 72', q:'Hotel Krone Churwalden' },
@@ -1253,7 +1282,7 @@ const DAYS = [
 
 /* ============================ 15/09 ============================ */
 {
-  id:'d15', date:'15/09', dow:'Segunda', n:6,
+  id:'d15', date:'15/09', dow:'Segunda', n:6, sr:'07:04', ss:'19:41',
   title:'Churwalden › Lindt Home of Chocolate › Zurique', sub:'CHECKPOINT: fábrica da Lindt + tarde na cidade velha',
   country:'Suíça', flag:'🇨🇭', base:'Zurique', park:'suica', tips:'de',
   hotel:{ n:'The Gate Boutique Hotel Zürich', c:'Zurique · Suíça', bf:true, tax:'R$ 72', q:'The Gate Boutique Hotel Zurich' },
@@ -1290,7 +1319,7 @@ const DAYS = [
 
 /* ============================ 16/09 ============================ */
 {
-  id:'d16', date:'16/09', dow:'Terça', n:7,
+  id:'d16', date:'16/09', dow:'Terça', n:7, sr:'07:01', ss:'19:34',
   title:'Zurique › Walensee › Feldkirch › Laterns', sub:'Manhã na cidade, tarde alpina e entrada na Áustria',
   country:'Áustria', flag:'🇦🇹', base:'Laterns (Vorarlberg)', park:'austria', tips:'de',
   hotel:{ n:'JUFA Hotel Laterns — Klangholzhus', c:'Laterns · Feldkirch', bf:true, tax:'R$ 24', q:'JUFA Hotel Laterns Klangholzhus'},
@@ -1330,7 +1359,7 @@ const DAYS = [
 
 /* ============================ 17/09 ============================ */
 {
-  id:'d17', date:'17/09', dow:'Quarta', n:8,
+  id:'d17', date:'17/09', dow:'Quarta', n:8, sr:'06:54', ss:'19:24',
   title:'Vaduz às 10h07 (Revolução Solar) › Innsbruck › Val di Fassa', sub:'O dia mais crítico e mais longo do roteiro',
   country:'Liechtenstein → Itália', flag:'🇱🇮', base:'Pera di Fassa (Trentino)', park:'vaduz', tips:'de',
   hotel:{ n:'Mason Marmoleda', c:'Pera di Fassa · Trentino', bf:true, tax:'R$ 24', q:'Mason Marmoleda Pera di Fassa' },
@@ -1340,6 +1369,7 @@ const DAYS = [
     {l:'danger', t:'DIA MAIS LONGO DE ESTRADA: ~5h30 de direção efetiva (Vaduz › Innsbruck › Val di Fassa). Acima da meta diária, mas incontornável pelo compromisso fixo.'},
     {l:'warn', t:'Pedágio da Brennerautobahn (A13, Áustria › Itália): ~€ 11. Vinheta austríaca já deve estar no carro; Liechtenstein usa a vinheta SUÍÇA (comprada no dia 14).'},
     {l:'ok',   t:'Café da manhã incluso nos dois hotéis. Taxa turística de hoje (Mason Marmoleda): R$ 24.'},
+    {l:'warn', t:'☀ Pôr do sol às 19h24. A parada em Innsbruck está cronometrada em 45 min justamente para chegar a Pera com a última luz — esticar lá custa o enrosadira.'},
     {l:'info', t:'Revezem a direção se possível. Faça pausa obrigatória de 15 min a cada 2h.'}
   ],
   transport:[
@@ -1359,10 +1389,10 @@ const DAYS = [
       {k:'onivoro', n:'Torkel Vaduz', txt:'Restaurante do Príncipe, cercado pelos vinhedos da Casa Real. Cozinha alpina refinada; peça um copo do vinho da propriedade.', price:'CHF 35–50', q:'Restaurant Torkel Vaduz'}
     ]},
     {p:'Tarde', time:'13:50', ic:'fa-car-side', k:'drive', title:'Vaduz › Innsbruck', txt:'Volta à Áustria, subida do vale do Klostertal e travessia do Arlberg. Paisagem de alta montanha o tempo todo.', dur:'2 h 10 · 190 km', dir:{o:'Vaduz Liechtenstein', d:'Innsbruck Austria'}},
-    {p:'Tarde', time:'16:10', ic:'fa-binoculars', k:'sight', title:'Innsbruck — Aussichtspunkt Kanzel', txt:'Mirante sobre a cidade, com Innsbruck encaixada entre a cadeia do Nordkette e os Alpes de Tux. Parada rápida e certeira antes de descer ao centro para ver o Telhado Dourado (Goldenes Dachl) e as fachadas barrocas da Maria-Theresien-Strasse.', dur:'1 h 15', cost:'Gratuito', q:'Aussichtspunkt Kanzel Innsbruck'},
-    {p:'Noite', time:'17:40', ic:'fa-car-side', k:'drive', title:'Innsbruck › Pera di Fassa (Dolomitas)', txt:'Brennerautobahn (pedágio ~€ 11), descida ao Alto Adige e entrada no Val di Fassa pelo vale do Avisio. Chegada com o último sol nas Dolomitas — o "enrosadira", quando as rochas ficam rosadas.', dur:'2 h 30 · 200 km', dir:{o:'Innsbruck Austria', d:'Pera di Fassa Trentino'}},
-    {p:'Noite', time:'20:15', ic:'fa-bed', k:'hotel', title:'Check-in — Mason Marmoleda (Pera di Fassa)', txt:'Casa alpina do Val di Fassa, ao pé da Marmolada. Estacionamento próprio e café da manhã incluso. Descanse: amanhã são as Dolomitas de verdade.', dur:'30 min', cost:'Taxa turística R$ 24', q:'Mason Marmoleda Pera di Fassa'},
-    {p:'Noite', time:'21:00', ic:'fa-utensils', k:'food', title:'Jantar no Val di Fassa', txt:'Cozinha ladina: cultura própria, língua própria e comida de montanha.', opts:[
+    {p:'Tarde', time:'16:10', ic:'fa-binoculars', k:'sight', title:'Innsbruck — Aussichtspunkt Kanzel', txt:'Mirante sobre a cidade, com Innsbruck encaixada entre a cadeia do Nordkette e os Alpes de Tux. PARADA CURTA E CRONOMETRADA: 45 min. É o que sobra para chegar ao Val di Fassa antes do pôr do sol às 19h24 — se esticar aqui, chega no escuro e perde o enrosadira.', dur:'45 min', cost:'Gratuito', q:'Aussichtspunkt Kanzel Innsbruck'},
+    {p:'Noite', time:'16:55', ic:'fa-car-side', k:'drive', title:'Innsbruck › Pera di Fassa (Dolomitas)', txt:'Brennerautobahn (pedágio ~€ 11), descida ao Alto Adige e entrada no Val di Fassa pelo vale do Avisio. Chegando às 19h25 você pega o "enrosadira", o brilho rosado que toma as paredes de dolomita nos minutos em torno do pôr do sol.', dur:'2 h 30 · 200 km', dir:{o:'Innsbruck Austria', d:'Pera di Fassa Trentino'}},
+    {p:'Noite', time:'19:25', ic:'fa-bed', k:'hotel', title:'Check-in — Mason Marmoleda (Pera di Fassa)', txt:'Casa alpina do Val di Fassa, ao pé da Marmolada. Estacionamento próprio e café da manhã incluso. Largue a mala e olhe para as montanhas: o enrosadira dura poucos minutos.', dur:'30 min', cost:'Taxa turística R$ 24', q:'Mason Marmoleda Pera di Fassa'},
+    {p:'Noite', time:'20:30', ic:'fa-utensils', k:'food', title:'Jantar no Val di Fassa', txt:'Cozinha ladina: cultura própria, língua própria e comida de montanha.', opts:[
       {k:'vegano', n:'Pizzeria do vale — versão vegetal', txt:'Pizza marinara com legumes ou massa ao pomodoro. Frase: "Senza formaggio, per favore."', price:'€ 12–18', q:'pizzeria Pera di Fassa'},
       {k:'onivoro', n:'Trattoria ladina em Pozza di Fassa', txt:'Canederli (bolinhos de pão), speck, polenta com cogumelos e strudel. Porções generosas e preço justo.', price:'€ 20–30', q:'ristorante Pozza di Fassa'}
     ]}
@@ -1371,7 +1401,7 @@ const DAYS = [
 
 /* ============================ 18/09 ============================ */
 {
-  id:'d18', date:'18/09', dow:'Quinta', n:9,
+  id:'d18', date:'18/09', dow:'Quinta', n:9, sr:'06:54', ss:'19:20',
   title:'Grande Estrada das Dolomitas + Lago di Braies', sub:'Passo Pordoi › Falzarego › Cortina › Braies ao entardecer',
   country:'Itália', flag:'🇮🇹', base:'Cortina d\'Ampezzo', park:'dolomitas', tips:'it',
   hotel:{ n:'Hotel Des Alpes', c:'Cortina d\'Ampezzo', bf:true, tax:'R$ 48', q:'Hotel Des Alpes Cortina d Ampezzo' },
@@ -1412,7 +1442,7 @@ const DAYS = [
 
 /* ============================ 19/09 ============================ */
 {
-  id:'d19', date:'19/09', dow:'Sexta', n:10,
+  id:'d19', date:'19/09', dow:'Sexta', n:10, sr:'06:48', ss:'19:11',
   title:'Tre Cime di Lavaredo › Lienz › Villach', sub:'A trilha mais icônica das Dolomitas e a travessia para a Áustria',
   country:'Áustria', flag:'🇦🇹', base:'Villach (Caríntia)', park:'austria', tips:'de',
   hotel:{ n:'Dietrichsteinerhof Apartments & Rooms', c:'Villach · Caríntia', bf:true, tax:'R$ 36', q:'Dietrichsteinerhof Villach' },
@@ -1452,7 +1482,7 @@ const DAYS = [
 
 /* ============================ 20/09 ============================ */
 {
-  id:'d20', date:'20/09', dow:'Sábado', n:11,
+  id:'d20', date:'20/09', dow:'Sábado', n:11, sr:'06:49', ss:'19:08',
   title:'Dia inteiro no Lago Bled', sub:'Vintgar › Mala Osojnica › volta ao lago › Straža › Castelo · noite em Liubliana',
   country:'Eslovênia', flag:'🇸🇮', base:'Liubliana', park:'liubliana', tips:'sl',
   hotel:{ n:'Holiday Inn Express Ljubljana', c:'Liubliana', bf:true, tax:'R$ 48', q:'Holiday Inn Express Ljubljana' },
@@ -1462,7 +1492,8 @@ const DAYS = [
     {l:'danger', t:'VINHETA ESLOVENA obrigatória: e-vinheta semanal € 16, comprada online (evinjeta.dars.si) ou em postos antes da fronteira.'},
     {l:'warn', t:'Túnel dos Karawanken (Áustria › Eslovênia): pedágio € 8,20. Alternativa gratuita e cênica: Wurzenpass, com 18% de inclinação — só com carro em boas condições.'},
     {l:'ok',   t:'Café da manhã incluso. Taxa turística de hoje (Holiday Inn Express): R$ 48. Duas noites no mesmo hotel — sem arrumar mala amanhã.'},
-    {l:'info', t:'Ingressos do dia: Vintgar € 20 · Castelo de Bled € 15 · Pletna até a ilha € 18. Total ~€ 53 em extras (fora do teto de alimentação).'}
+    {l:'info', t:'Ingressos do dia: Vintgar € 20 · Castelo de Bled € 15 · Pletna até a ilha € 18. Total ~€ 53 em extras (fora do teto de alimentação).'},
+    {l:'warn', t:'☀ Pôr do sol às 19h08. A ordem da tarde foi montada para o castelo cair exatamente nesse horário — é a melhor vista do dia e ela dura poucos minutos.'}
   ],
   transport:[
     'Villach › Bled: 1h05 pela A11/E61 e túnel dos Karawanken.',
@@ -1478,22 +1509,22 @@ const DAYS = [
       {k:'vegano', n:'Vila Ajda / Slaščičarna vegana em Bled', txt:'Bled tem boas casas com pratos vegetais: risoto de cogumelos, sopa de abóbora e versões veganas da Kremšnita em algumas confeitarias. Pergunte: "Imate vegansko?"', price:'€ 14–20', q:'vegan restaurant Bled Slovenia'},
       {k:'onivoro', n:'Gostilna Murka (Bled)', txt:'Casa tradicional eslovena com jardim: sopa de cogumelos em pão, štruklji e truta do rio Sava.', price:'€ 22–32', q:'Gostilna Murka Bled'}
     ]},
-    {p:'Tarde', time:'14:15', ic:'fa-person-walking', k:'walk', title:'Volta a pé pelo Lago Bled', txt:'6 km de caminho totalmente plano contornando a água, alternando calçada, terra e trechos de floresta. No percurso está o Baročni kip svete Marije Magdalene, a estátua barroca de Maria Madalena, marco histórico à beira do lago.', dur:'1 h 45 · 6 km plano', cost:'Gratuito', q:'Lake Bled Slovenia'},
-    {p:'Tarde', time:'16:00', ic:'fa-ship', k:'sight', title:'Pletna até a Ilha de Bled (Blejski otok)', txt:'Barco tradicional a remo, conduzido em pé pelos "pletnari" — ofício hereditário desde 1590. Na ilha, suba os 99 degraus até a igreja da Assunção e toque o sino dos desejos.', dur:'1 h 30', cost:'€ 18 + igreja € 12', q:'Blejski otok Bled Island'},
-    {p:'Tarde', time:'17:40', ic:'fa-binoculars', k:'sight', title:'Straža Bled — mirante sul', txt:'Colina em frente ao castelo, alcançável a pé em 15 min ou de telecadeira. Vista do lago pelo ângulo oposto ao do Mala Osojnica, ideal no fim da tarde com o sol de frente para o castelo.', dur:'50 min', cost:'Telecadeira € 12 · a pé gratuito', q:'Straza Bled'},
-    {p:'Noite', time:'18:40', ic:'fa-chess-rook', k:'star', title:'Blejski grad — Castelo de Bled', txt:'O castelo mais antigo da Eslovênia (primeira menção em 1011), cravado 130 m acima do lago. Museu, adega medieval onde se engarrafa o próprio vinho, oficina de impressão e o terraço com a melhor vista panorâmica de todas. Aberto até 20h/21h no verão-outono.', dur:'1 h 20', cost:'€ 15', q:'Blejski grad Bled Castle'},
-    {p:'Noite', time:'20:10', ic:'fa-car-side', k:'drive', title:'Bled › Liubliana', txt:'40 min pela A2. Deixe o carro na garagem e vá a pé jantar no centro histórico.', dur:'40 min · 55 km', dir:{o:'Bled Slovenia', d:'Holiday Inn Express Ljubljana'}},
-    {p:'Noite', time:'21:00', ic:'fa-utensils', k:'food', title:'Jantar em Liubliana', txt:'A margem do rio Ljubljanica concentra os melhores restaurantes, com mesas ao ar livre até tarde.', opts:[
+    {p:'Tarde', time:'14:15', ic:'fa-person-walking', k:'walk', title:'Volta a pé pelo Lago Bled', txt:'6 km de caminho totalmente plano contornando a água, alternando calçada, terra e trechos de floresta. No percurso está o Baročni kip svete Marije Magdalene, a estátua barroca de Maria Madalena, marco histórico à beira do lago.', dur:'1 h 30 · 6 km plano', cost:'Gratuito', q:'Lake Bled Slovenia'},
+    {p:'Tarde', time:'15:45', ic:'fa-binoculars', k:'sight', title:'Straža Bled — mirante sul', txt:'Colina em frente ao castelo, alcançável a pé em 15 min ou de telecadeira. Vista do lago pelo ângulo oposto ao do Mala Osojnica, com o sol ainda alto iluminando o castelo de frente.', dur:'45 min', cost:'Telecadeira € 12 · a pé gratuito', q:'Straza Bled'},
+    {p:'Tarde', time:'16:40', ic:'fa-ship', k:'sight', title:'Pletna até a Ilha de Bled (Blejski otok)', txt:'Barco tradicional a remo, conduzido em pé pelos "pletnari" — ofício hereditário desde 1590. Na ilha, suba os 99 degraus até a igreja da Assunção e toque o sino dos desejos.', dur:'1 h 20', cost:'€ 18 + igreja € 12', q:'Blejski otok Bled Island'},
+    {p:'Noite', time:'18:05', ic:'fa-chess-rook', k:'star', title:'Blejski grad — Castelo de Bled ao pôr do sol', txt:'O castelo mais antigo da Eslovênia (primeira menção em 1011), cravado 130 m acima do lago. Museu, adega medieval onde se engarrafa o próprio vinho, e o terraço com a melhor vista panorâmica de todas. HORÁRIO ESCOLHIDO DE PROPÓSITO: o sol se põe às 19h08 e você estará no terraço para ver — depois disso a paisagem some e sobra o castelo iluminado.', dur:'1 h 30', cost:'€ 15', q:'Blejski grad Bled Castle'},
+    {p:'Noite', time:'19:45', ic:'fa-car-side', k:'drive', title:'Bled › Liubliana', txt:'40 min pela A2. Deixe o carro na garagem e vá a pé jantar no centro histórico.', dur:'40 min · 55 km', dir:{o:'Bled Slovenia', d:'Holiday Inn Express Ljubljana'}},
+    {p:'Noite', time:'20:40', ic:'fa-utensils', k:'food', title:'Jantar em Liubliana', txt:'A margem do rio Ljubljanica concentra os melhores restaurantes, com mesas ao ar livre até tarde.', opts:[
       {k:'vegano', n:'Barbarella Juice Bar / Loving Hut Ljubljana', txt:'Casas 100% vegetais, com bowls, wraps e sopas. Preços baixos para padrão europeu.', price:'€ 10–16', q:'vegan restaurant Ljubljana center'},
       {k:'onivoro', n:'Gostilna na Gradu / Druga Violina', txt:'Cozinha eslovena contemporânea. A Druga Violina é um projeto social com preços muito acessíveis, na Stari trg.', price:'€ 15–25', q:'Druga Violina Ljubljana'}
     ]},
-    {p:'Noite', time:'22:30', ic:'fa-bed', k:'hotel', title:'Check-in — Holiday Inn Express Ljubljana', txt:'Duas noites aqui: desfaça a mala de verdade. Café da manhã incluso.', dur:'20 min', cost:'Taxa turística R$ 48', q:'Holiday Inn Express Ljubljana'}
+    {p:'Noite', time:'22:15', ic:'fa-bed', k:'hotel', title:'Check-in — Holiday Inn Express Ljubljana', txt:'Duas noites aqui: desfaça a mala de verdade. Café da manhã incluso.', dur:'20 min', cost:'Taxa turística R$ 48', q:'Holiday Inn Express Ljubljana'}
   ]
 },
 
 /* ============================ 21/09 ============================ */
 {
-  id:'d21', date:'21/09', dow:'Domingo', n:12,
+  id:'d21', date:'21/09', dow:'Domingo', n:12, sr:'06:48', ss:'19:04',
   title:'Postojna, Predjama e Liubliana inteira', sub:'Caverna e castelo na rocha pela manhã · capital à tarde e à noite',
   country:'Eslovênia', flag:'🇸🇮', base:'Liubliana', park:'liubliana', tips:'sl',
   hotel:{ n:'Holiday Inn Express Ljubljana', c:'Liubliana', bf:true, tax:'R$ 48', q:'Holiday Inn Express Ljubljana' },
@@ -1503,7 +1534,8 @@ const DAYS = [
     {l:'danger', t:'CAVERNA DE POSTOJNA: compre online com horário marcado (tours de hora em hora). O combo Postojna + Predjama sai por ~€ 45 e economiza € 12.'},
     {l:'warn', t:'Dentro da caverna faz 10 °C o ano inteiro e a umidade é alta. Leve um casaco — eles alugam capa por € 5, mas a fila é longa.'},
     {l:'ok',   t:'Café da manhã incluso. Taxa turística: R$ 48. Segunda e última noite no Holiday Inn.'},
-    {l:'info', t:'Direção leve: ~1h50 no total. Tarde e noite inteiramente a pé no centro histórico.'}
+    {l:'info', t:'Direção leve: ~1h50 no total. Tarde e noite inteiramente a pé no centro histórico.'},
+    {l:'warn', t:'☀ Pôr do sol às 19h04, o mais cedo da viagem até aqui. Tivoli foi puxado para as 15h45 e o castelo para as 17h40 justamente por isso.'}
   ],
   transport:[
     'Liubliana › Postojna: 50 min pela A1. Predjama fica a 15 min de Postojna por estrada local.',
@@ -1519,11 +1551,11 @@ const DAYS = [
       {k:'vegano', n:'Falafel / Ajdovo pri Vodnjaku (Liubliana)', txt:'Casas de comida rápida saudável no centro, com falafel, hummus e pratos de trigo sarraceno. Baratíssimo e cheio de locais.', price:'€ 8–14', q:'Falafel Ljubljana Trubarjeva'},
       {k:'onivoro', n:'Klobasarna (Ciril-Metodov trg)', txt:'Balcão minúsculo especializado na kranjska klobasa, a salsicha protegida da Carníola, servida com mostarda e pão. Institucional.', price:'€ 8–14', q:'Klobasarna Ljubljana'}
     ]},
-    {p:'Tarde', time:'14:45', ic:'fa-bridge', k:'sight', title:'Centro histórico: Prešernov trg, Tromostovje e Zmajski most', txt:'O coração de Liubliana desenhado por Jože Plečnik: a Tríplice Ponte, a igreja franciscana rosa, a Ponte dos Dragões (símbolo da cidade, 1901) e a Ponte dos Cadeados. Tudo plano, tudo a 5 min de distância entre si.', dur:'1 h 30', cost:'Gratuito', q:'Presernov trg Ljubljana'},
-    {p:'Tarde', time:'16:15', ic:'fa-store', k:'sight', title:'Mercado Central de Plečnik e margem do Ljubljanica', txt:'Colunata à beira-rio projetada por Plečnik, com bancas de queijo, mel e produtos do campo. A "Odprta kuhna" (cozinha aberta) acontece às sextas, mas a orla é sempre viva.', dur:'1 h', cost:'Gratuito', q:'Ljubljana Central Market Plecnik'},
-    {p:'Tarde', time:'17:15', ic:'fa-chess-rook', k:'star', title:'Ljubljanski grad — Castelo de Liubliana', txt:'Fortaleza do século XI no alto da colina, alcançada por funicular de 60 segundos. A Torre do Mirante oferece a vista de 360° sobre os telhados vermelhos e, em dias claros, até o Triglav. Inclui museu de história eslovena e o teatro de marionetes.', dur:'2 h', cost:'€ 16 (funicular + castelo)', q:'Ljubljanski grad Ljubljana Castle'},
-    {p:'Noite', time:'19:30', ic:'fa-tree', k:'sight', title:'Parque Tivoli ao entardecer', txt:'O grande parque urbano de Liubliana, com a alameda Jakopič e árvores centenárias. Caminhada plana e tranquila para fechar o dia antes do jantar.', dur:'50 min', cost:'Gratuito', q:'Tivoli Park Ljubljana'},
-    {p:'Noite', time:'20:45', ic:'fa-utensils', k:'food', title:'Jantar de despedida da Eslovênia', txt:'Mesas à beira do rio, com o castelo iluminado ao fundo.', opts:[
+    {p:'Tarde', time:'14:30', ic:'fa-bridge', k:'sight', title:'Centro histórico: Prešernov trg, Tromostovje e Zmajski most', txt:'O coração de Liubliana desenhado por Jože Plečnik: a Tríplice Ponte, a igreja franciscana rosa, a Ponte dos Dragões (símbolo da cidade, 1901) e a Ponte dos Cadeados. Tudo plano, tudo a 5 min de distância entre si.', dur:'1 h 30', cost:'Gratuito', q:'Presernov trg Ljubljana'},
+    {p:'Tarde', time:'15:45', ic:'fa-tree', k:'sight', title:'Parque Tivoli', txt:'O grande parque urbano de Liubliana, com a alameda Jakopič e árvores centenárias. Caminhada plana e tranquila, feita à tarde com luz — o sol se põe cedo aqui, às 19h04.', dur:'1 h', cost:'Gratuito', q:'Tivoli Park Ljubljana'},
+    {p:'Tarde', time:'16:50', ic:'fa-store', k:'sight', title:'Colunata de Plečnik e margem do Ljubljanica', txt:'Colunata à beira-rio projetada por Plečnik, o arquiteto que desenhou a Liubliana moderna. ATENÇÃO: hoje é domingo e as bancas do mercado não abrem — o que vale é a arquitetura da colunata e o passeio pela orla, sempre vivo com cafés.', dur:'45 min', cost:'Gratuito', q:'Ljubljana Central Market Plecnik'},
+    {p:'Noite', time:'17:40', ic:'fa-chess-rook', k:'star', title:'Ljubljanski grad — Castelo de Liubliana ao pôr do sol', txt:'Fortaleza do século XI no alto da colina, alcançada por funicular de 60 segundos. A Torre do Mirante oferece a vista de 360° sobre os telhados vermelhos e, em dias claros, até o Triglav. Suba à torre antes das 19h04 — é a hora em que a cidade inteira fica dourada. Inclui museu de história eslovena.', dur:'2 h', cost:'€ 16 (funicular + castelo)', q:'Ljubljanski grad Ljubljana Castle'},
+    {p:'Noite', time:'20:00', ic:'fa-utensils', k:'food', title:'Jantar de despedida da Eslovênia', txt:'Mesas à beira do rio, com o castelo iluminado ao fundo.', opts:[
       {k:'vegano', n:'Vegan Kitchen Barbarella / Organic Garden', txt:'Cardápio integralmente vegetal, do burger de grão-de-bico aos doces sem laticínios.', price:'€ 12–18', q:'Organic Garden Ljubljana'},
       {k:'onivoro', n:'Gostilna Sokol', txt:'Casa histórica com receitas eslovenas antigas servidas por garçons em traje tradicional: goulash, štruklji e vinho da Estíria.', price:'€ 20–30', q:'Gostilna Sokol Ljubljana'}
     ]}
@@ -1532,7 +1564,7 @@ const DAYS = [
 
 /* ============================ 22/09 ============================ */
 {
-  id:'d22', date:'22/09', dow:'Segunda', n:13,
+  id:'d22', date:'22/09', dow:'Segunda', n:13, sr:'06:52', ss:'19:05',
   title:'Ístria e Pula', sub:'Rovinj no caminho · Arena, Templo de Augusto, Kaštel e enseada Mužilj',
   country:'Croácia', flag:'🇭🇷', base:'Pula', park:'pula', tips:'hr',
   hotel:{ n:'Artena Hotel', c:'Pula · Ístria', bf:true, tax:'R$ 24', q:'Artena Hotel Pula' },
@@ -1542,7 +1574,8 @@ const DAYS = [
     {l:'warn', t:'Fronteira Eslovênia › Croácia: ambos no Espaço Schengen desde 2023, mas há controles aleatórios. Passaporte e documento do carro à mão.'},
     {l:'info', t:'Autoestradas croatas NÃO usam vinheta: retire o ticket na entrada e pague na saída (cartão aceito). A Ístria usa a "Istarski ipsilon".'},
     {l:'ok',   t:'Croácia adota o euro desde 2023 — nada de câmbio. Café da manhã incluso; taxa turística: R$ 24.'},
-    {l:'info', t:'Direção total: ~3h. Dentro da meta, com o trecho mais bonito entre Rovinj e Pula.'}
+    {l:'info', t:'Direção total: ~3h. Dentro da meta, com o trecho mais bonito entre Rovinj e Pula.'},
+    {l:'warn', t:'☀ Pôr do sol no Adriático às 19h05. A enseada Mužilj foi antecipada para as 18h30 — no horário anterior você chegaria com o sol já sumindo.'}
   ],
   transport:[
     'Liubliana › Rovinj: 2h15 pela A1 e Istarski ipsilon, com a fronteira em Dragonja ou Kaštel.',
@@ -1559,11 +1592,11 @@ const DAYS = [
     ]},
     {p:'Tarde', time:'14:15', ic:'fa-car-side', k:'drive', title:'Rovinj › Pula', txt:'Costa oeste da Ístria, entre pinheiros e enseadas.', dur:'45 min · 40 km', dir:{o:'Rovinj Croatia', d:'Pula Croatia'}},
     {p:'Tarde', time:'15:15', ic:'fa-landmark', k:'star', title:'Arena de Pula (Anfiteatro Romano)', txt:'Um dos seis maiores anfiteatros romanos do mundo e o único com as quatro torres laterais e todos os três níveis preservados. Construído no século I, comportava 23 mil pessoas. Os subterrâneos abrigam um museu sobre azeite e vinho na antiguidade.', dur:'1 h 15', cost:'€ 10', q:'Pula Arena Amphitheater'},
-    {p:'Tarde', time:'16:40', ic:'fa-columns', k:'sight', title:'Templo de Augusto (Augustov hram) e Fórum', txt:'Templo romano do ano 2 a.C. na praça do Fórum, destruído por bomba em 1944 e reconstruído pedra por pedra. Ao lado, o Arco dos Sérgios e a rua Sergijevaca completam o circuito romano, tudo a pé.', dur:'1 h', cost:'€ 4', q:'Augustov hram Temple of Augustus Pula'},
-    {p:'Tarde', time:'17:45', ic:'fa-chess-rook', k:'sight', title:'Pulski Kaštel — Cidadela de Pula', txt:'Fortaleza veneziana em estrela do século XVII no ponto mais alto da cidade, hoje Museu Histórico e Naval da Ístria. O terraço dá a vista completa sobre a Arena, o porto e o golfo — o melhor lugar para entender a geografia de Pula.', dur:'1 h', cost:'€ 6', q:'Pulski Kastel Pula Citadel'},
-    {p:'Noite', time:'19:00', ic:'fa-umbrella-beach', k:'sight', title:'Uvala Mužilj — enseada ao pôr do sol', txt:'Enseada tranquila a poucos minutos do centro, longe das praias lotadas: água transparente, pinheiros até a borda e rochas planas para sentar. O lugar certo para ver o sol cair no Adriático e encerrar o dia com banho, se a água permitir (~22 °C em setembro).', dur:'1 h 30', cost:'Gratuito', q:'Uvala Muzilj Pula'},
-    {p:'Noite', time:'20:45', ic:'fa-bed', k:'hotel', title:'Check-in — Artena Hotel', txt:'Hotel em Pula com estacionamento. Café da manhã incluso.', dur:'30 min', cost:'Taxa turística R$ 24', q:'Artena Hotel Pula'},
-    {p:'Noite', time:'21:30', ic:'fa-utensils', k:'food', title:'Jantar em Pula', txt:'A zona do Fórum e a rua Kandlerova concentram as boas mesas.', opts:[
+    {p:'Tarde', time:'16:35', ic:'fa-columns', k:'sight', title:'Templo de Augusto (Augustov hram) e Fórum', txt:'Templo romano do ano 2 a.C. na praça do Fórum, destruído por bomba em 1944 e reconstruído pedra por pedra. Ao lado, o Arco dos Sérgios e a rua Sergijevaca completam o circuito romano, tudo a pé.', dur:'50 min', cost:'€ 4', q:'Augustov hram Temple of Augustus Pula'},
+    {p:'Tarde', time:'17:30', ic:'fa-chess-rook', k:'sight', title:'Pulski Kaštel — Cidadela de Pula', txt:'Fortaleza veneziana em estrela do século XVII no ponto mais alto da cidade, hoje Museu Histórico e Naval da Ístria. O terraço dá a vista completa sobre a Arena, o porto e o golfo — o melhor lugar para entender a geografia de Pula.', dur:'55 min', cost:'€ 6', q:'Pulski Kastel Pula Citadel'},
+    {p:'Noite', time:'18:30', ic:'fa-umbrella-beach', k:'sight', title:'Uvala Mužilj — enseada ao pôr do sol', txt:'Enseada tranquila a poucos minutos do centro, longe das praias lotadas: água transparente, pinheiros até a borda e rochas planas para sentar. Chegando às 18h30 sobra meia hora de luz antes de o sol tocar o Adriático às 19h05 — tempo para um banho, se a água permitir (~22 °C em setembro), e para ver o pôr do sol sentado.', dur:'1 h 15', cost:'Gratuito', q:'Uvala Muzilj Pula'},
+    {p:'Noite', time:'20:00', ic:'fa-bed', k:'hotel', title:'Check-in — Artena Hotel', txt:'Hotel em Pula com estacionamento. Café da manhã incluso.', dur:'30 min', cost:'Taxa turística R$ 24', q:'Artena Hotel Pula'},
+    {p:'Noite', time:'21:00', ic:'fa-utensils', k:'food', title:'Jantar em Pula', txt:'A zona do Fórum e a rua Kandlerova concentram as boas mesas.', opts:[
       {k:'vegano', n:'Restaurantes do centro com menu vegetal', txt:'Massa com legumes, blitva (acelga com batata, prato dálmata clássico e naturalmente vegano) e salada istriana.', price:'€ 12–18', q:'restaurant Kandlerova Pula'},
       {k:'onivoro', n:'Konoba Batelina (Banjole) ou Jupiter (centro)', txt:'A Batelina, a 15 min de carro, é lendária por peixe fresquíssimo (reserve com dias de antecedência). No centro, a Jupiter faz a melhor pizza da cidade.', price:'€ 15–40', q:'Konoba Batelina Banjole Pula'}
     ]}
@@ -1572,7 +1605,7 @@ const DAYS = [
 
 /* ============================ 23/09 ============================ */
 {
-  id:'d23', date:'23/09', dow:'Terça', n:14,
+  id:'d23', date:'23/09', dow:'Terça', n:14, sr:'07:00', ss:'19:09',
   title:'Costa da Ístria › Piran › Trieste › Mestre', sub:'Dia de estrada cênica pelo alto Adriático',
   country:'Itália', flag:'🇮🇹', base:'Mestre (Veneza)', park:'mestre', tips:'it',
   hotel:{ n:'Hotel Antico Moro', c:'Mestre · Veneza', bf:true, tax:'R$ 48', q:'Hotel Antico Moro Mestre' },
@@ -1613,7 +1646,7 @@ const DAYS = [
 
 /* ============================ 24/09 ============================ */
 {
-  id:'d24', date:'24/09', dow:'Quarta', n:15,
+  id:'d24', date:'24/09', dow:'Quarta', n:15, sr:'07:01', ss:'19:07',
   title:'Veneza inteira, de trem a partir de Mestre', sub:'San Marco › Ducal › Rialto › Dorsoduro · pôr do sol no Parco San Giuliano',
   country:'Itália', flag:'🇮🇹', base:'Mestre (Veneza)', park:'mestre', tips:'it',
   hotel:{ n:'Hotel Antico Moro', c:'Mestre · Veneza', bf:true, tax:'R$ 48', q:'Hotel Antico Moro Mestre' },
@@ -1623,7 +1656,8 @@ const DAYS = [
     {l:'danger', t:'NÃO leve o carro à ilha. Piazzale Roma cobra € 29–35/dia e vive lotado. O trem custa € 1,45 e leva 10 min.'},
     {l:'warn', t:'Contributo di Accesso (taxa de entrada em Veneza): aplica-se apenas em datas específicas da alta temporada. Verifique no site oficial na véspera — em setembro normalmente não incide.'},
     {l:'ok',   t:'Café da manhã incluso. Taxa turística: R$ 48. Última noite em Mestre.'},
-    {l:'info', t:'Dia de 15 km caminhados sobre pedra e pontes. Calçado confortável não é opcional.'}
+    {l:'info', t:'Dia de 15 km caminhados sobre pedra e pontes. Calçado confortável não é opcional.'},
+    {l:'warn', t:'☀ Pôr do sol às 19h07. Todo o fim de tarde foi antecipado em 45 min para o Parco San Giuliano pegar a laguna dourada — no horário anterior você chegaria depois do escuro.'}
   ],
   transport:[
     'Trem regional Mestre › Venezia Santa Lucia: 10 min, € 1,45, sai a cada 10–15 min. Valide o bilhete antes de embarcar.',
@@ -1640,11 +1674,11 @@ const DAYS = [
       {k:'vegano', n:'La Tecia Vegana (Dorsoduro/Giudecca)', txt:'Restaurante 100% vegano em Veneza, com releituras vegetais de clássicos venezianos. Reserve.', price:'€ 18–26', q:'La Tecia Vegana Venezia'},
       {k:'onivoro', n:'Bacaro de cicchetti (Cantina Do Mori / Do Spade)', txt:'A tradição real de Veneza: petiscos no balcão com uma taça de vinho. O Do Mori funciona desde 1462.', price:'€ 15–25', q:'Cantina Do Mori Venezia'}
     ]},
-    {p:'Tarde', time:'14:45', ic:'fa-palette', k:'sight', title:'Dorsoduro — o bairro que Veneza guarda para si', txt:'O lado calmo e universitário: a Ponte dell\'Accademia (a melhor vista do Grande Canal), a igreja de Santa Maria della Salute (1631, erguida como voto pelo fim da peste), a Punta della Dogana e o passeio das Zattere de frente para a Giudecca. Ruas largas, poucos turistas.', dur:'2 h 30', cost:'Salute gratuita · Accademia € 15 (opcional)', q:'Dorsoduro Venezia'},
-    {p:'Tarde', time:'17:15', ic:'fa-ship', k:'sight', title:'Vaporetto linha 1 pelo Grande Canal', txt:'Do Dorsoduro até Ferrovia, o trajeto lento (45 min) passa por mais de 170 palácios góticos e renascentistas com a luz dourada do fim de tarde. Sente-se na proa, se conseguir.', dur:'1 h', cost:'€ 9,50', q:'Vaporetto Line 1 Grand Canal Venice'},
-    {p:'Noite', time:'18:45', ic:'fa-train', k:'train', title:'Retorno a Mestre', txt:'Trem de volta, 10 min.', dur:'30 min · € 1,45', dir:{o:'Venezia Santa Lucia', d:'Stazione Venezia Mestre'}},
-    {p:'Noite', time:'19:30', ic:'fa-tree', k:'star', title:'Parco di San Giuliano — pôr do sol sobre a laguna', txt:'O maior parque urbano da Itália (700 ha), na borda da laguna em Mestre. Do dique de terra se vê Veneza inteira em silhueta contra o pôr do sol, com os campanários recortados no horizonte. Gratuito, plano e frequentado quase só por moradores — o contraponto perfeito ao dia turístico.', dur:'1 h 15', cost:'Gratuito', q:'Parco di San Giuliano Mestre'},
-    {p:'Noite', time:'21:00', ic:'fa-utensils', k:'food', title:'Jantar em Mestre', txt:'Preços de cidade real depois de um dia de preços de ilha.', opts:[
+    {p:'Tarde', time:'14:45', ic:'fa-palette', k:'sight', title:'Dorsoduro — o bairro que Veneza guarda para si', txt:'O lado calmo e universitário: a Ponte dell\'Accademia (a melhor vista do Grande Canal), a igreja de Santa Maria della Salute (1631, erguida como voto pelo fim da peste), a Punta della Dogana e o passeio das Zattere de frente para a Giudecca. Ruas largas, poucos turistas.', dur:'2 h', cost:'Salute gratuita · Accademia € 15 (opcional)', q:'Dorsoduro Venezia'},
+    {p:'Tarde', time:'16:45', ic:'fa-ship', k:'sight', title:'Vaporetto linha 1 pelo Grande Canal', txt:'Do Dorsoduro até Ferrovia, o trajeto lento (45 min) passa por mais de 170 palácios góticos e renascentistas com a luz dourada do fim de tarde. Sente-se na proa, se conseguir.', dur:'1 h', cost:'€ 9,50', q:'Vaporetto Line 1 Grand Canal Venice'},
+    {p:'Noite', time:'17:50', ic:'fa-train', k:'train', title:'Retorno a Mestre', txt:'Trem de volta, 10 min. Não perca este: o pôr do sol no parque é às 19h07 e vale a corrida.', dur:'30 min · € 1,45', dir:{o:'Venezia Santa Lucia', d:'Stazione Venezia Mestre'}},
+    {p:'Noite', time:'18:25', ic:'fa-tree', k:'star', title:'Parco di San Giuliano — pôr do sol sobre a laguna', txt:'O maior parque urbano da Itália (700 ha), na borda da laguna em Mestre. Do dique de terra se vê Veneza inteira em silhueta contra o pôr do sol, com os campanários recortados no horizonte. O sol some às 19h07: chegando às 18h25 você pega os 40 minutos em que a laguna fica dourada. Gratuito, plano e frequentado quase só por moradores — o contraponto perfeito ao dia turístico.', dur:'1 h 20', cost:'Gratuito', q:'Parco di San Giuliano Mestre'},
+    {p:'Noite', time:'20:00', ic:'fa-utensils', k:'food', title:'Jantar em Mestre', txt:'Preços de cidade real depois de um dia de preços de ilha.', opts:[
       {k:'vegano', n:'Casa vegetariana/vegana de Mestre', txt:'Pizza com legumes sem queijo, massas ao pomodoro e verduras grelhadas. Mestre tem boa oferta e preço honesto.', price:'€ 12–18', q:'vegan restaurant Mestre'},
       {k:'onivoro', n:'Trattoria veneta em Mestre', txt:'Bigoli in salsa, baccalà mantecato e risi e bisi — a cozinha veneta sem a taxa turística.', price:'€ 20–28', q:'trattoria veneta Mestre'}
     ]}
@@ -1653,7 +1687,7 @@ const DAYS = [
 
 /* ============================ 25/09 ============================ */
 {
-  id:'d25', date:'25/09', dow:'Quinta', n:16,
+  id:'d25', date:'25/09', dow:'Quinta', n:16, sr:'07:15', ss:'19:18',
   title:'Mestre › Verona › Milão', sub:'Última travessia longa · Duomo de Milão ao entardecer',
   country:'Itália', flag:'🇮🇹', base:'Milão', park:'milao', tips:'it',
   hotel:{ n:'Admiral Hotel', c:'Milão', bf:true, tax:'R$ 60', q:'Admiral Hotel Milano' },
@@ -1691,7 +1725,7 @@ const DAYS = [
 
 /* ============================ 26/09 ============================ */
 {
-  id:'d26', date:'26/09', dow:'Sexta', n:17,
+  id:'d26', date:'26/09', dow:'Sexta', n:17, sr:'07:18', ss:'19:18',
   title:'Castello Sforzesco, Sempione e devolução do carro', sub:'Último dia italiano · noite na região do aeroporto MXP',
   country:'Itália', flag:'🇮🇹', base:'Malpensa (MXP)', park:'aeroporto', tips:'it',
   hotel:{ n:'Hotel na região do Aeroporto MXP', c:'Malpensa · Milão', bf:true, tax:'R$ 60', q:'hotel Malpensa Airport Milano' },
@@ -1730,7 +1764,7 @@ const DAYS = [
 
 /* ============================ 27/09 ============================ */
 {
-  id:'d27', date:'27/09', dow:'Sábado', n:18,
+  id:'d27', date:'27/09', dow:'Sábado', n:18, sr:'08:08', ss:'20:06',
   title:'MXP › Madrid · Retiro e Vallecas', sub:'Voo 06h40 · Palácio de Cristal, roseiral e loja do Rayo',
   country:'Espanha', flag:'🇪🇸', base:'Madrid', park:'madrid', tips:'es',
   hotel:{ n:'InHome MADRID CENTRO', c:'Madrid', bf:false, tax:'€ 0', q:'InHome Madrid Centro' },
@@ -1773,7 +1807,7 @@ const DAYS = [
 
 /* ============================ 28/09 ============================ */
 {
-  id:'d28', date:'28/09', dow:'Domingo', n:19,
+  id:'d28', date:'28/09', dow:'Domingo', n:19, sr:'08:09', ss:'20:04',
   title:'Bernabéu, últimos passos e voo de volta', sub:'Partida de Madrid às 23h15 · chegada no Brasil às 05h00',
   country:'Espanha', flag:'🇪🇸', base:'Madrid → Brasil', park:'madrid', tips:'es',
   hotel:{ n:'Sem pernoite — voo noturno a partir do Aeroporto MAD', c:'Madrid · Barajas', bf:false, tax:'€ 0', q:'Aeropuerto Adolfo Suarez Madrid Barajas T1' },
@@ -1817,6 +1851,21 @@ const DAYS = [
    ===================================================================== */
 const $  = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+const toMin = t => { const [h,m] = String(t||'').split(':').map(Number); return (h*60 + (m||0)); };
+
+/* Duração da luz do dia, para o chip do cabeçalho */
+const daylight = d => {
+  const v = toMin(d.ss) - toMin(d.sr);
+  return Math.floor(v/60) + 'h' + String(v%60).padStart(2,'0');
+};
+
+/* Um bloco cai no escuro? Horários de madrugada (antes do nascer) contam também. */
+const afterDark = (time, d) => {
+  if (!d || !d.ss) return false;
+  const t = toMin(time);
+  return t >= toMin(d.ss) || t < toMin(d.sr);
+};
 
 const mapsUrl = q => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
 const dirUrl  = (o,d) => 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(o) + '&destination=' + encodeURIComponent(d) + '&travelmode=driving';
@@ -1983,10 +2032,11 @@ function foodOptions(opts){
   </div>`;
 }
 
-function tlItem(it){
+function tlItem(it, d){
   const s = K_STYLE[it.k] || K_STYLE.sight;
   const href = it.dir ? dirUrl(it.dir.o, it.dir.d) : (it.q ? mapsUrl(it.q) : null);
-  const chips = `${it.dur  ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-regular fa-clock text-sky-300"></i>${it.dur}</span>` : ''}${it.cost ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-solid fa-euro-sign text-amber-300"></i>${it.cost}</span>` : ''}`;
+  const dark = afterDark(it.time, d);
+  const chips = `${it.dur  ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-regular fa-clock text-sky-300"></i>${it.dur}</span>` : ''}${it.cost ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-solid fa-euro-sign text-amber-300"></i>${it.cost}</span>` : ''}${dark ? `<span class="chip !py-0.5 !text-[10px]" style="background:rgba(129,140,248,.14);border-color:rgba(129,140,248,.4)" title="Depois do pôr do sol (${d.ss}) ou antes do nascer (${d.sr})"><i class="fa-solid fa-moon text-indigo-300"></i>no escuro</span>` : ''}`;
 
   const inner = `
     <div class="flex items-start gap-3 min-w-0">
@@ -2095,6 +2145,11 @@ function renderDay(i){
           <span class="chip !py-1"><i class="fa-solid fa-calendar-day text-sky-300"></i>Dia ${d.n} de 19</span>
           <span class="chip !py-1">${d.flag} ${d.country}</span>
           <span class="chip !py-1"><i class="fa-solid fa-location-dot text-rose-300"></i>${d.base}</span>
+          <span class="chip !py-1" title="Luz natural disponível neste dia">
+            <i class="fa-solid fa-sun text-amber-300"></i>${d.sr}
+            <i class="fa-solid fa-arrow-right text-white/30 text-[8px]"></i>
+            ${d.ss} <span class="text-white/40">· ${daylight(d)} de luz</span>
+          </span>
         </div>
         <h2 class="font-display font-extrabold text-xl md:text-3xl leading-tight txt-balance">${d.title}</h2>
         <p class="text-white/55 text-[12.5px] md:text-sm mt-1.5 leading-relaxed">${d.sub}</p>
@@ -2156,7 +2211,7 @@ function renderDay(i){
         <div class="flex-1 divider"></div>
         <span class="text-[10px] text-white/35 font-mono">${items.length} blocos</span>
       </div>
-      <div class="tl-rail">${items.map(tlItem).join('')}</div>
+      <div class="tl-rail">${items.map(t => tlItem(t, d)).join('')}</div>
     </div>`;
   }).join('');
 
@@ -2234,14 +2289,94 @@ function renderOverview(){
 }
 function toggleOverview(open){ $('#overviewModal').classList.toggle('hidden', !open); document.body.style.overflow = open ? 'hidden' : ''; }
 
+/* ---------------- Dia de hoje ---------------- */
+const ANO_VIAGEM = 2026;
+
+/* Índice do dia de hoje no roteiro, ou -1 se estamos fora da viagem. */
+function indiceDeHoje(){
+  const agora = new Date();
+  const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+  return DAYS.findIndex(d => {
+    const [dia, mes] = d.date.split('/').map(Number);
+    return hoje.getTime() === new Date(ANO_VIAGEM, mes - 1, dia).getTime();
+  });
+}
+
+function configurarBotaoHoje(){
+  const i = indiceDeHoje();
+  const btn = $('#btnHoje');
+  if (i < 0) return;                       // fora do período: botão fica escondido
+  btn.classList.remove('hidden');
+  btn.addEventListener('click', () => select(i));
+}
+
+/* ---------------- Uso offline ---------------- */
+function registrarServiceWorker(){
+  if (!('serviceWorker' in navigator)) return;
+  // Só funciona em https:// (ou localhost). Aberto como arquivo local, é ignorado.
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+function prepararOffline(){
+  const bar  = $('#offlineBar'), msg = $('#offlineMsg'), fill = $('#offlineFill');
+  const mostrar = t => { bar.classList.remove('hidden'); msg.textContent = t; };
+
+  if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller){
+    mostrar('O modo offline exige o site publicado em https:// — abrindo o arquivo direto ele não liga.');
+    fill.style.width = '100%';
+    fill.style.background = 'rgba(251,191,36,.6)';
+    return;
+  }
+
+  const urls = [
+    './', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
+    ...[...document.querySelectorAll('link[rel="stylesheet"], script[src]')].map(e => e.href || e.src).filter(Boolean),
+    ...Object.values(PHOTOS).map(p => p.u)
+  ];
+
+  mostrar('Baixando ' + urls.length + ' arquivos para uso sem internet…');
+  fill.style.width = '2%';
+  navigator.serviceWorker.controller.postMessage({ tipo: 'PRECARREGAR', urls });
+}
+
+function ouvirProgressoOffline(){
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.addEventListener('message', e => {
+    const d = e.data || {};
+    const msg = $('#offlineMsg'), fill = $('#offlineFill');
+    if (d.tipo === 'PROGRESSO'){
+      const pct = d.total ? Math.round(d.feitos / d.total * 100) : 0;
+      fill.style.width = Math.max(2, pct) + '%';
+      msg.textContent = `Baixando para uso offline… ${d.feitos} de ${d.total}`;
+    }
+    if (d.tipo === 'CONCLUIDO'){
+      fill.style.width = '100%';
+      msg.textContent = d.falhas
+        ? `Pronto para usar offline — ${d.feitos} arquivos salvos, ${d.falhas} falharam (tente de novo com wi-fi melhor).`
+        : `Pronto. O roteiro inteiro, com as ${d.total} peças, funciona sem internet.`;
+    }
+  });
+}
+
 /* ---------------- Init ---------------- */
 (function init(){
   renderNavs();
   renderTotals();
   renderOverview();
+  registrarServiceWorker();
+  ouvirProgressoOffline();
+  configurarBotaoHoje();
+
+  // Prioridade de abertura: link direto (#d20) > dia de hoje > primeiro dia
   const hash = location.hash.replace('#','');
-  const idx = Math.max(0, DAYS.findIndex(d => d.id === hash));
-  select(idx === -1 ? 0 : idx);
+  const porHash = DAYS.findIndex(d => d.id === hash);
+  const hoje = indiceDeHoje();
+  const idx = porHash >= 0 ? porHash : (hoje >= 0 ? hoje : 0);
+  select(idx);
+
+  $('#btnOffline').addEventListener('click', prepararOffline);
+  $('#offlineClose').addEventListener('click', () => $('#offlineBar').classList.add('hidden'));
 
   $('#btnOverview').addEventListener('click', ()=>toggleOverview(true));
   $$('[data-close-overview]').forEach(el => el.addEventListener('click', ()=>toggleOverview(false)));
