@@ -916,6 +916,50 @@ const PHOTOS = {
  }
 };
 
+/* --- Onde comprar cada ingresso. A chave é a mesma usada na busca do Maps.
+       Todos os endereços foram testados: respondem HTTP 200. Os poucos que
+       bloqueiam robô (Castello Sforzesco) abrem normalmente no navegador.
+       hora:true  = entrada com horário marcado, esgota — compre antes.
+       antes:true = vale comprar antes, mas dá para resolver na bilheteria. --- */
+const BILHETES = {
+  'Palacio Real de Madrid':            { url:'https://entradas.patrimonionacional.es/', hora:true,  preco:'€ 14', nota:'Fila de até 40 min sem compra antecipada' },
+  'Estadio Santiago Bernabeu Madrid':  { url:'https://www.realmadrid.com/es-ES/tour-bernabeu', hora:true, preco:'€ 35', nota:'CANCELADO em dia de jogo — confira o calendário antes' },
+  'Castel Baradello Como':             { url:'https://www.visitcomo.eu/', antes:true, preco:'€ 5', nota:'Abre em dias limitados; confirme na semana' },
+  'Villa Monastero Varenna':           { url:'https://www.villamonastero.eu/', antes:true, preco:'€ 12' },
+  'Castello di Vezio Varenna':         { url:'https://www.castellodivezio.it/', antes:true, preco:'€ 6' },
+  'Viamala Schlucht Thusis':           { url:'https://www.viamala.ch/', antes:true, preco:'CHF 9' },
+  'Lindt Home of Chocolate Kilchberg': { url:'https://www.lindt-home-of-chocolate.com/', hora:true, preco:'CHF 15', nota:'Entrada por faixa horária e esgota nos fins de semana' },
+  'Schattenburg Feldkirch':            { url:'https://www.feldkirch.travel/', antes:true, preco:'€ 6' },
+  'Passo Pordoi':                      { url:'https://www.fassa.com/', antes:true, preco:'€ 22', nota:'Teleférico do Sass Pordoi, opcional' },
+  'Lago di Braies Pragser Wildsee':    { url:'https://www.prags.bz/', hora:true, preco:'Parking € 6/h', nota:'Acesso de carro restrito 09h30–16h: confirme se exige reserva' },
+  'Forcella Lavaredo Tre Cime':        { url:'https://www.auronzomisurina.it/', antes:true, preco:'€ 30 por carro', nota:'Pedágio pago na cancela; chegue antes das 08h30' },
+  'Schloss Bruck Lienz':               { url:'https://www.museum-schlossbruck.at/', antes:true, preco:'€ 10' },
+  'Soteska Vintgar Bled':              { url:'https://www.vintgar.si/', hora:true, preco:'€ 20', nota:'Ingresso com horário marcado, sentido único' },
+  'Blejski grad Bled Castle':          { url:'https://www.blejski-grad.si/', antes:true, preco:'€ 15' },
+  'Postojnska jama Postojna Cave':     { url:'https://www.postojnska-jama.eu/', hora:true, preco:'€ 31,90 · combo € 45', nota:'Tours de hora em hora; o combo com Predjama economiza € 12' },
+  'Predjamski grad Predjama Castle':   { url:'https://www.postojnska-jama.eu/', hora:true, preco:'€ 17,90', nota:'Incluído no combo com Postojna' },
+  'Ljubljanski grad Ljubljana Castle': { url:'https://www.ljubljanskigrad.si/', antes:true, preco:'€ 16', nota:'Funicular + castelo' },
+  'Pula Arena Amphitheater':           { url:'https://www.ami.hr/', antes:true, preco:'€ 10' },
+  'Euphrasian Basilica Porec':         { url:'https://www.zupaporec.com/', antes:true, preco:'€ 10' },
+  'Palazzo Ducale Venezia':            { url:'https://palazzoducale.visitmuve.it/', hora:true, preco:'€ 30', nota:'Sem hora marcada a fila passa de 1 h' },
+  'Piazza San Marco Venezia':          { url:'https://www.basilicasanmarco.it/', hora:true, preco:'€ 3 + campanário € 10', nota:'Basílica exige reserva de horário, mesmo sendo barata' },
+  'Arena di Verona':                   { url:'https://www.arena.it/', antes:true, preco:'€ 12' },
+  'Duomo di Milano':                   { url:'https://www.duomomilano.it/', hora:true, preco:'€ 15–20', nota:'Terraços com horário marcado; fecham por volta das 19h' },
+  'Castello Sforzesco Milano':         { url:'https://www.milanocastello.it/', antes:true, preco:'€ 5', nota:'Pátios gratuitos; o ingresso é só para os museus' }
+};
+
+/* A Decolar vende ingressos parcelados, mas o catálogo dela cobre as capitais
+   e quase nada do que este roteiro tem de específico. Verificado em set/2026. */
+const DECOLAR = {
+  base: 'https://www.decolar.com/atracoes-turisticas/',
+  cidades: {
+    'Madrid':  'https://www.decolar.com/atracoes-turisticas/mad/atracoes-madrid',
+    'Zurique': 'https://www.decolar.com/atracoes-turisticas/zrh/atracoes-zurique',
+    'Veneza':  'https://www.decolar.com/atracoes-turisticas/vce/atracoes-veneza',
+    'Milão':   'https://www.decolar.com/atracoes-turisticas/mil/atracoes-milao'
+  }
+};
+
 /* --- Custos por dia, em euros.
 
    ALIMENTAÇÃO é o total DO CASAL: a soma da opção vegana com a onívora de cada
@@ -2233,10 +2277,33 @@ function foodOptions(opts){
   </div>`;
 }
 
+/* Bloco de compra de ingresso. Fica fora do link do card: um <a> dentro de
+   outro <a> é inválido, então cartões com ingresso deixam de ser clicáveis por
+   inteiro — o Maps passa a ser um botão próprio. */
+function bilheteBloco(it){
+  const b = it.q && BILHETES[it.q];
+  if (!b) return '';
+  const urgente = !!b.hora;
+  return `<div class="mt-3 rounded-xl p-3" style="background:${urgente?'rgba(251,191,36,.10)':'rgba(255,255,255,.05)'};border:1px solid ${urgente?'rgba(251,191,36,.35)':'var(--edge-soft)'}">
+    <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+      <i class="fa-solid ${urgente?'fa-clock text-amber-300':'fa-ticket text-white/50'} text-[11px]"></i>
+      <span class="text-[11px] font-semibold ${urgente?'text-amber-200':'text-white/70'}">
+        ${urgente ? 'Horário marcado — compre antes' : 'Ingresso'}
+      </span>
+      ${b.preco ? `<span class="text-[11px] text-white/50 ml-auto">${b.preco}</span>` : ''}
+    </div>
+    ${b.nota ? `<div class="text-[11px] text-white/55 leading-snug mb-2">${b.nota}</div>` : ''}
+    <a href="${b.url}" target="_blank" rel="noopener" class="btn-map w-full justify-center">
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>Site oficial de venda
+    </a>
+  </div>`;
+}
+
 function tlItem(it, d){
   const s = K_STYLE[it.k] || K_STYLE.sight;
   const href = it.dir ? dirUrl(it.dir.o, it.dir.d) : (it.q ? mapsUrl(it.q) : null);
   const dark = afterDark(it.time, d);
+  const temBilheteLocal = !!(it.q && BILHETES[it.q]);
   const chips = `${it.dur  ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-regular fa-clock text-sky-300"></i>${it.dur}</span>` : ''}${it.cost ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-solid fa-euro-sign text-amber-300"></i>${it.cost}</span>` : ''}${dark ? `<span class="chip !py-0.5 !text-[10px]" style="background:rgba(129,140,248,.14);border-color:rgba(129,140,248,.4)" title="Depois do pôr do sol (${d.ss}) ou antes do nascer (${d.sr})"><i class="fa-solid fa-moon text-indigo-300"></i>no escuro</span>` : ''}`;
 
   const inner = `
@@ -2246,15 +2313,20 @@ function tlItem(it, d){
         <h4 class="font-display font-bold text-[14px] md:text-[15px] leading-snug txt-balance">${it.title}</h4>
         <div class="hidden md:flex flex-wrap items-center gap-1.5 mt-1.5">${chips}</div>
       </div>
-      ${href ? `<span class="btn-map shrink-0 hidden md:inline-flex"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Rota':'Maps'}</span>` : ''}
+      ${href ? (temBilheteLocal
+          ? `<a href="${href}" target="_blank" rel="noopener" class="btn-map shrink-0 hidden md:inline-flex"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Rota':'Maps'}</a>`
+          : `<span class="btn-map shrink-0 hidden md:inline-flex"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Rota':'Maps'}</span>`) : ''}
     </div>
     ${chips ? `<div class="md:hidden flex flex-wrap items-center gap-1.5 mt-2.5">${chips}</div>` : ''}
     ${it.txt ? `<p class="text-[12.5px] md:text-[13px] text-white/68 leading-relaxed mt-2.5">${it.txt}</p>` : ''}
-    ${href ? `<span class="btn-map md:hidden mt-3 w-full justify-center"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Ver rota no Maps':'Abrir no Maps'}</span>` : ''}`;
+    ${href ? (temBilheteLocal
+        ? `<a href="${href}" target="_blank" rel="noopener" class="btn-map md:hidden mt-3 w-full justify-center"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Ver rota no Maps':'Abrir no Maps'}</a>`
+        : `<span class="btn-map md:hidden mt-3 w-full justify-center"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Ver rota no Maps':'Abrir no Maps'}</span>`) : ''}
+    ${bilheteBloco(it)}`;
 
   const body = it.opts
     ? `<div class="glass rounded-2xl p-3.5 md:p-4">${inner}${foodOptions(it.opts)}</div>`
-    : (href
+    : (href && !temBilheteLocal
         ? `<a href="${href}" target="_blank" rel="noopener" class="card-link block glass rounded-2xl p-3.5 md:p-4">${inner}</a>`
         : `<div class="glass rounded-2xl p-3.5 md:p-4">${inner}</div>`);
 
@@ -2330,7 +2402,66 @@ function sidePanels(d){
     </div>
   </section>`;
 
-  return parking + transport + tips + quick;
+  return parking + transport + ingressos() + tips + quick;
+}
+
+/* Painel único com tudo que precisa ser comprado antes, na ordem do roteiro.
+   Os com horário marcado vêm primeiro porque são os que esgotam. */
+function ingressos(){
+  const linhas = [];
+  DAYS.forEach(d => d.tl.forEach(t => {
+    const b = t.q && BILHETES[t.q];
+    if (b) linhas.push({ dia:d.date, id:d.id, titulo:t.title.replace(/^⭐\s*/,''), ...b });
+  }));
+  const comHora = linhas.filter(x => x.hora);
+  const resto   = linhas.filter(x => !x.hora);
+
+  const item = x => `
+    <li class="flex gap-2 items-start">
+      <span class="text-[10px] font-mono text-white/35 pt-0.5 shrink-0 w-9">${x.dia}</span>
+      <div class="min-w-0 flex-1">
+        <a href="${x.url}" target="_blank" rel="noopener"
+           class="text-[12px] text-sky-300 hover:text-sky-200 leading-snug">${x.titulo}
+           <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-60"></i></a>
+        ${x.preco ? `<div class="text-[10.5px] text-white/40">${x.preco}</div>` : ''}
+      </div>
+    </li>`;
+
+  return `<section class="glass rounded-2xl p-4" style="border-color:rgba(251,191,36,.35)">
+    <h3 class="font-display font-bold text-[13px] flex items-center gap-2 mb-1">
+      <i class="fa-solid fa-ticket text-amber-300"></i>Ingressos a comprar
+    </h3>
+    <p class="text-[11px] text-white/45 mb-3">Endereços oficiais, todos testados. Comprar direto na fonte costuma sair mais barato que revenda.</p>
+
+    <div class="rounded-xl px-3 py-2.5 mb-3" style="background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.35)">
+      <div class="text-[11px] font-semibold text-amber-200 mb-1.5">
+        <i class="fa-solid fa-clock"></i> ${comHora.length} com horário marcado — esgotam
+      </div>
+      <ul class="space-y-1.5">${comHora.map(item).join('')}</ul>
+    </div>
+
+    <div class="text-[10px] uppercase tracking-wide text-white/40 mb-1.5">Dá para resolver na bilheteria</div>
+    <ul class="space-y-1.5 mb-3">${resto.map(item).join('')}</ul>
+
+    <div class="divider mb-2.5"></div>
+    <div class="text-[10px] uppercase tracking-wide text-white/40 mb-1.5">
+      <i class="fa-solid fa-credit-card"></i> Parcelar na Decolar
+    </div>
+    <p class="text-[11.5px] text-white/60 leading-relaxed mb-2">
+      A Decolar vende ingressos parcelados, mas o catálogo cobre as capitais e quase nada
+      do que este roteiro tem de específico. Não achei Postojna, Bled, Vintgar, Pula, Lindt,
+      Tre Cime nem Braies. Onde existe, costuma ser passeio guiado ou passe de cidade — não
+      a entrada avulsa com o horário que você precisa.
+    </p>
+    <div class="grid grid-cols-2 gap-1.5">
+      ${Object.entries(DECOLAR.cidades).map(([c,u]) => `
+        <a href="${u}" target="_blank" rel="noopener" class="btn-map !text-[11px] justify-center">${c}</a>`).join('')}
+    </div>
+    <p class="text-[10.5px] text-white/35 leading-relaxed mt-2">
+      Verificado em setembro de 2026 pelo índice de busca — o site bloqueia leitura
+      automatizada, então confirme preço e data no app antes de contar com isso.
+    </p>
+  </section>`;
 }
 
 /* ---------------- Render do dia ---------------- */
