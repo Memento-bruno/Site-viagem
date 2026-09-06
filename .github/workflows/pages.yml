@@ -25,10 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # enablement liga o Pages no repositório caso ainda esteja desligado
+      # O Pages precisa estar ligado uma vez, à mão, em
+      # Settings > Pages > Source: "GitHub Actions".
+      # O GITHUB_TOKEN consegue publicar, mas não consegue criar o site
+      # do zero ("Resource not accessible by integration").
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       # Site estático: sobe a raiz do repositório como está
       - uses: actions/upload-pages-artifact@v3
