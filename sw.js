@@ -4,16 +4,22 @@
    dos Grisões e das Dolomitas o sinal cai, e roaming na Suíça é caro.
    ===================================================================== */
 
-const VERSAO = '2026-v2';
+const VERSAO = '2026-v3';
 const CACHE  = `roteiro-${VERSAO}`;
 
 /* Arquivos próprios: sempre em cache, atualizados em segundo plano. */
+const FA = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/';
 const CASCA = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  // Sem estas, offline todo ícone vira quadrado com X: o CSS carrega do cache
+  // mas a fonte que ele referencia nunca foi baixada.
+  FA + 'fa-solid-900.woff2',
+  FA + 'fa-regular-400.woff2',
+  FA + 'fa-brands-400.woff2'
 ];
 
 /* Hosts externos que valem cachear (CDNs e as fotos de licença livre). */
@@ -30,8 +36,11 @@ const cacheavel = url => EXTERNOS.some(h => url.hostname === h || url.hostname.e
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
-    // addAll falha inteiro se um item falhar; guardamos um a um para ser tolerante
-    await Promise.all(CASCA.map(u => c.add(u).catch(() => {})));
+    // addAll falha inteiro se um item falhar; guardamos um a um para ser tolerante.
+    // Cross-origin (as fontes) precisa de no-cors, senão a resposta é rejeitada.
+    await Promise.all(CASCA.map(u =>
+      buscarEGuardar(new Request(u), c).catch(() => {})
+    ));
     self.skipWaiting();
   })());
 });

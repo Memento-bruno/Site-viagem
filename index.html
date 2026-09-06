@@ -14,6 +14,8 @@
 <meta name="description" content="Itinerário interativo dia a dia: Espanha, Itália, Suíça, Áustria, Liechtenstein, Eslovênia e Croácia — 10/09 a 28/09.">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -2402,66 +2404,7 @@ function sidePanels(d){
     </div>
   </section>`;
 
-  return parking + transport + ingressos() + tips + quick;
-}
-
-/* Painel único com tudo que precisa ser comprado antes, na ordem do roteiro.
-   Os com horário marcado vêm primeiro porque são os que esgotam. */
-function ingressos(){
-  const linhas = [];
-  DAYS.forEach(d => d.tl.forEach(t => {
-    const b = t.q && BILHETES[t.q];
-    if (b) linhas.push({ dia:d.date, id:d.id, titulo:t.title.replace(/^⭐\s*/,''), ...b });
-  }));
-  const comHora = linhas.filter(x => x.hora);
-  const resto   = linhas.filter(x => !x.hora);
-
-  const item = x => `
-    <li class="flex gap-2 items-start">
-      <span class="text-[10px] font-mono text-white/35 pt-0.5 shrink-0 w-9">${x.dia}</span>
-      <div class="min-w-0 flex-1">
-        <a href="${x.url}" target="_blank" rel="noopener"
-           class="text-[12px] text-sky-300 hover:text-sky-200 leading-snug">${x.titulo}
-           <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-60"></i></a>
-        ${x.preco ? `<div class="text-[10.5px] text-white/40">${x.preco}</div>` : ''}
-      </div>
-    </li>`;
-
-  return `<section class="glass rounded-2xl p-4" style="border-color:rgba(251,191,36,.35)">
-    <h3 class="font-display font-bold text-[13px] flex items-center gap-2 mb-1">
-      <i class="fa-solid fa-ticket text-amber-300"></i>Ingressos a comprar
-    </h3>
-    <p class="text-[11px] text-white/45 mb-3">Endereços oficiais, todos testados. Comprar direto na fonte costuma sair mais barato que revenda.</p>
-
-    <div class="rounded-xl px-3 py-2.5 mb-3" style="background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.35)">
-      <div class="text-[11px] font-semibold text-amber-200 mb-1.5">
-        <i class="fa-solid fa-clock"></i> ${comHora.length} com horário marcado — esgotam
-      </div>
-      <ul class="space-y-1.5">${comHora.map(item).join('')}</ul>
-    </div>
-
-    <div class="text-[10px] uppercase tracking-wide text-white/40 mb-1.5">Dá para resolver na bilheteria</div>
-    <ul class="space-y-1.5 mb-3">${resto.map(item).join('')}</ul>
-
-    <div class="divider mb-2.5"></div>
-    <div class="text-[10px] uppercase tracking-wide text-white/40 mb-1.5">
-      <i class="fa-solid fa-credit-card"></i> Parcelar na Decolar
-    </div>
-    <p class="text-[11.5px] text-white/60 leading-relaxed mb-2">
-      A Decolar vende ingressos parcelados, mas o catálogo cobre as capitais e quase nada
-      do que este roteiro tem de específico. Não achei Postojna, Bled, Vintgar, Pula, Lindt,
-      Tre Cime nem Braies. Onde existe, costuma ser passeio guiado ou passe de cidade — não
-      a entrada avulsa com o horário que você precisa.
-    </p>
-    <div class="grid grid-cols-2 gap-1.5">
-      ${Object.entries(DECOLAR.cidades).map(([c,u]) => `
-        <a href="${u}" target="_blank" rel="noopener" class="btn-map !text-[11px] justify-center">${c}</a>`).join('')}
-    </div>
-    <p class="text-[10.5px] text-white/35 leading-relaxed mt-2">
-      Verificado em setembro de 2026 pelo índice de busca — o site bloqueia leitura
-      automatizada, então confirme preço e data no app antes de contar com isso.
-    </p>
-  </section>`;
+  return parking + transport + tips + quick;
 }
 
 /* ---------------- Render do dia ---------------- */
@@ -2754,6 +2697,12 @@ function configurarBotaoHoje(){
 }
 
 /* ---------------- Uso offline ---------------- */
+const FA = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/';
+const FONTES_ICONE = [
+  FA + 'fa-solid-900.woff2',
+  FA + 'fa-regular-400.woff2',
+  FA + 'fa-brands-400.woff2'
+];
 function registrarServiceWorker(){
   if (!('serviceWorker' in navigator)) return;
   // Só funciona em https:// (ou localhost). Aberto como arquivo local, é ignorado.
@@ -2772,8 +2721,13 @@ function prepararOffline(){
     return;
   }
 
+  /* As fontes dos ícones precisam entrar explicitamente: o CSS do Font Awesome
+     as referencia por url() e o navegador só as pede quando um ícone aparece na
+     tela. Sem isso, offline o CSS carrega, a fonte não chega, e todo ícone vira
+     um quadradinho com X. */
   const urls = [
     './', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
+    ...FONTES_ICONE,
     ...[...document.querySelectorAll('link[rel="stylesheet"], script[src]')].map(e => e.href || e.src).filter(Boolean),
     ...Object.values(PHOTOS).map(p => p.u)
   ];
