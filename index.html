@@ -108,8 +108,10 @@ if (window.tailwind) tailwind.config = {
     border:1px solid var(--edge-soft); background:rgba(255,255,255,.05);
     max-width:100%; white-space:normal; overflow-wrap:anywhere;
   }
-  @media (min-width:768px){ .chip{ white-space:nowrap; } }
-  h1,h2,h3,h4,p,li,span{ overflow-wrap:break-word; }
+  @media (min-width:1024px){ .chip{ white-space:nowrap; } }
+  /* 'anywhere' (e não 'break-word') porque só ele reduz o min-content,
+     deixando o texto encolher dentro de colunas de grid estreitas */
+  h1,h2,h3,h4,p,li,span,div{ overflow-wrap:anywhere; }
   .btn-map{
     display:inline-flex; align-items:center; gap:.45rem;
     padding:.5rem .75rem; border-radius:.7rem; font-size:.75rem; font-weight:600;
@@ -137,6 +139,32 @@ if (window.tailwind) tailwind.config = {
   @keyframes pulseDot{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
   .pulse{ animation:pulseDot 1.8s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+  /* ---------- Miniaturas ---------- */
+  .thumb{
+    position:relative; flex:0 0 auto; overflow:hidden; border-radius:.85rem;
+    background:rgba(255,255,255,.05); border:1px solid var(--edge-soft);
+    box-shadow:0 6px 18px -10px rgba(0,0,0,.8);
+  }
+  .thumb img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:saturate(.92) contrast(1.02); transition:transform .35s ease, filter .35s ease;
+  }
+  .card-link:hover .thumb img{ transform:scale(1.06); filter:saturate(1.05) contrast(1.04); }
+  .thumb::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(180deg,transparent 55%,rgba(4,8,18,.35));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
+  }
+  .thumb-fallback{ display:grid; place-items:center; width:100%; height:100%; }
+  .t-sm{ width:56px; height:56px; }
+  .t-md{ width:56px; height:56px; }
+  .t-lg{ width:72px; height:72px; }
+  @media (min-width:768px){
+    .t-sm{ width:64px; height:64px; }
+    .t-md{ width:84px; height:84px; }
+    .t-lg{ width:104px; height:104px; }
+  }
+
   /* ---------- Utils ---------- */
   .txt-balance{ text-wrap:balance; }
   .divider{ height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent); }
@@ -215,6 +243,7 @@ if (window.tailwind) tailwind.config = {
 
   <footer class="mt-10 mb-6 text-center text-[11px] text-white/35 safe-b">
     <p class="mb-1"><i class="fa-solid fa-circle-info mr-1"></i> Horários, preços e disponibilidade são estimativas — confirme reservas e funcionamento antes de cada dia.</p>
+    <p class="mb-1"><i class="fa-solid fa-camera mr-1"></i> Fotos de licença livre (Wikimedia Commons e Openverse/Flickr CC), passe o mouse sobre uma imagem para ver crédito e autoria. Onde não existe foto licenciada — caso de quase todos os hotéis e restaurantes — o cartão mostra o ícone da categoria; a foto real está no link do Maps.</p>
     <p>Roteiro pessoal · Espanha › Itália › Suíça › Áustria › Liechtenstein › Eslovênia › Croácia</p>
   </footer>
 </div>
@@ -240,6 +269,622 @@ if (window.tailwind) tailwind.config = {
 /* =====================================================================
    BASE DE DADOS DO ROTEIRO
    ===================================================================== */
+
+/* --- Fotos de licença livre (Wikimedia Commons / Openverse-Flickr CC).
+       Chave = a mesma string usada na busca do Google Maps.
+       u=url · t=título do arquivo · s=fonte · by=autor · l=licença · a=texto alternativo --- */
+const PHOTOS = {
+ "Aeroporto Internacional de Guarulhos": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Terminal_3_de_Guarulhos.jpg/500px-Terminal_3_de_Guarulhos.jpg",
+  "t": "Aeroporto Internacional de São Paulo-Guarulhos",
+  "s": "Wikimedia Commons",
+  "a": "Decolagem do Brasil"
+ },
+ "Aeropuerto Adolfo Suarez Madrid Barajas T4": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Terminal_4_del_aeropuerto_de_Madrid-Barajas%2C_Espa%C3%B1a%2C_2013-01-09%2C_DD_01.jpg/500px-Terminal_4_del_aeropuerto_de_Madrid-Barajas%2C_Espa%C3%B1a%2C_2013-01-09%2C_DD_01.jpg",
+  "t": "Terminal 4 del aeropuerto de Madrid-Barajas, España, 2013-01-09, DD 01.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Aterrissagem — Aeroporto Adolfo Suárez Madrid-Barajas"
+ },
+ "Aeropuerto Adolfo Suarez Madrid Barajas T1": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Terminal_4_del_aeropuerto_de_Madrid-Barajas%2C_Espa%C3%B1a%2C_2013-01-09%2C_DD_01.jpg/500px-Terminal_4_del_aeropuerto_de_Madrid-Barajas%2C_Espa%C3%B1a%2C_2013-01-09%2C_DD_01.jpg",
+  "t": "Terminal 4 del aeropuerto de Madrid-Barajas, España, 2013-01-09, DD 01.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Sem pernoite — voo noturno a partir do Aeroporto MAD"
+ },
+ "Aeropuerto Madrid Barajas": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Terminal_4_del_aeropuerto_de_Madrid-Barajas%2C_Espa%C3%B1a%2C_2013-01-09%2C_DD_01.jpg/500px-Terminal_4_del_aeropuerto_de_Madrid-Barajas%2C_Espa%C3%B1a%2C_2013-01-09%2C_DD_01.jpg",
+  "t": "Terminal 4 del aeropuerto de Madrid-Barajas, España, 2013-01-09, DD 01.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Chegada em Madrid-Barajas"
+ },
+ "Templo de Debod Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Templo_de_Debod_in_Madrid.jpg/500px-Templo_de_Debod_in_Madrid.jpg",
+  "t": "Templo de Debod",
+  "s": "Wikimedia Commons",
+  "a": "Templo de Debod"
+ },
+ "Rosaleda del Parque del Oeste Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Vista_de_la_rosaleda_del_parque_del_Oeste.jpg/500px-Vista_de_la_rosaleda_del_parque_del_Oeste.jpg",
+  "t": "Rosaleda del parque del Oeste",
+  "s": "Wikimedia Commons",
+  "a": "Rosaleda del Parque del Oeste"
+ },
+ "Palacio Real de Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Palacio_Real_de_Madrid_Julio_2016_%28cropped%29.jpg/500px-Palacio_Real_de_Madrid_Julio_2016_%28cropped%29.jpg",
+  "t": "Palacio Real de Madrid",
+  "s": "Wikimedia Commons",
+  "a": "Palácio Real de Madrid + Catedral da Almudena"
+ },
+ "Plaza Mayor Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Plaza_Mayor_de_Madrid_06.jpg/500px-Plaza_Mayor_de_Madrid_06.jpg",
+  "t": "Plaza Mayor de Madrid",
+  "s": "Wikimedia Commons",
+  "a": "Plaza Mayor"
+ },
+ "El Oso y el Madrono Puerta del Sol Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/El_oso_y_el_madro%C3%B1o_-_02.jpg/500px-El_oso_y_el_madro%C3%B1o_-_02.jpg",
+  "t": "Estatua del Oso y el Madroño",
+  "s": "Wikimedia Commons",
+  "a": "Puerta del Sol + tocar no bumbum do urso 🐻"
+ },
+ "Gran Via Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/MADRID_100206_UDCI_019.jpg/500px-MADRID_100206_UDCI_019.jpg",
+  "t": "Gran Vía",
+  "s": "Wikimedia Commons",
+  "a": "Gran Vía a pé"
+ },
+ "Fuente de Cibeles Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fuente_de_Cibeles_-_Dec_2024.jpg/500px-Fuente_de_Cibeles_-_Dec_2024.jpg",
+  "t": "Fuente de Cibeles",
+  "s": "Wikimedia Commons",
+  "a": "Fuente de Cibeles + Palacio de Cibeles"
+ },
+ "Mercado de San Miguel Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Mercado_de_San_Miguel_2025.jpg/500px-Mercado_de_San_Miguel_2025.jpg",
+  "t": "Mercado de San Miguel",
+  "s": "Wikimedia Commons",
+  "a": "Mercado de San Miguel"
+ },
+ "Chocolateria San Gines Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Chocolater%C3%ADa_%22San_Gines%22-Madrid-2009.jpg/500px-Chocolater%C3%ADa_%22San_Gines%22-Madrid-2009.jpg",
+  "t": "Chocolatería San Ginés",
+  "s": "Wikimedia Commons",
+  "a": "Chocolatería San Ginés"
+ },
+ "Sobrino de Botin Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Casa_Bot%C3%ADn-Madrid-2009.jpg/500px-Casa_Bot%C3%ADn-Madrid-2009.jpg",
+  "t": "Sobrino de Botín",
+  "s": "Wikimedia Commons",
+  "a": "Sobrino de Botín (o restaurante mais antigo do mundo, 1725)"
+ },
+ "Palacio de Cristal Parque del Retiro Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Palacio_de_Cristal%2C_Retiro%2C_Madrid.jpg/500px-Palacio_de_Cristal%2C_Retiro%2C_Madrid.jpg",
+  "t": "Palacio de Cristal del Retiro",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Parque del Retiro — Estanque e Palácio de Cristal"
+ },
+ "Jardines de Cecilio Rodriguez Retiro Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Jardines_de_Cecilio_Rodr%C3%ADguez_%2816_de_noviembre_de_2014%2C_Madrid%29_01.JPG/500px-Jardines_de_Cecilio_Rodr%C3%ADguez_%2816_de_noviembre_de_2014%2C_Madrid%29_01.JPG",
+  "t": "Jardines de Cecilio Rodríguez",
+  "s": "Wikimedia Commons",
+  "a": "La Rosaleda + Jardines de Cecilio Rodríguez"
+ },
+ "Tienda Oficial Rayo Vallecano Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Estadio_de_Vallecas_18_de_febrero_de_2025.jpg/500px-Estadio_de_Vallecas_18_de_febrero_de_2025.jpg",
+  "t": "Estadio de Vallecas",
+  "s": "Wikimedia Commons",
+  "a": "Tienda Oficial Rayo Vallecano"
+ },
+ "Estadio Santiago Bernabeu Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Santiago_Bernabeu_Stadium_Front.jpg/500px-Santiago_Bernabeu_Stadium_Front.jpg",
+  "t": "Santiago Bernabeu Stadium Front.jpg",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Tour do Estádio Santiago Bernabéu"
+ },
+ "Aeroporto Milano Malpensa": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Aerial_photograph_of_Milan_Malpensa_airport.jpg/500px-Aerial_photograph_of_Milan_Malpensa_airport.jpg",
+  "t": "Aeroporto di Milano-Malpensa",
+  "s": "Wikimedia Commons",
+  "a": "Voo Madrid › Milão Malpensa (MXP)"
+ },
+ "Castel Baradello Como": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Torre_Castel_Baradello.jpg/500px-Torre_Castel_Baradello.jpg",
+  "t": "Castel Baradello",
+  "s": "Wikimedia Commons",
+  "a": "Castel Baradello"
+ },
+ "Basilica di Sant Abbondio Como": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Basilica_vista_frontale.jpg/500px-Basilica_vista_frontale.jpg",
+  "t": "Basilica di Sant'Abbondio",
+  "s": "Wikimedia Commons",
+  "a": "Basílica de Sant'Abbondio"
+ },
+ "Duomo di Como": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/2_como_vista_aerea-0080.jpg/500px-2_como_vista_aerea-0080.jpg",
+  "t": "Duomo di Como",
+  "s": "Wikimedia Commons",
+  "a": "Duomo di Como"
+ },
+ "Tempio Voltiano Como": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Como%2C_Tempio_Voltiano.jpg/500px-Como%2C_Tempio_Voltiano.jpg",
+  "t": "Tempio voltiano",
+  "s": "Wikimedia Commons",
+  "a": "Tempio Voltiano"
+ },
+ "Villa Olmo Como": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Villa_Olmo_Riflessa.jpg/500px-Villa_Olmo_Riflessa.jpg",
+  "t": "Villa Olmo",
+  "s": "Wikimedia Commons",
+  "a": "Passeio à beira-lago até a Villa Olmo"
+ },
+ "Castello di Vezio Varenna": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Castillo_de_Vezio%2C_Varenna%2C_Italia%2C_2016-06-25%2C_DD_01.jpg/500px-Castillo_de_Vezio%2C_Varenna%2C_Italia%2C_2016-06-25%2C_DD_01.jpg",
+  "t": "Castello di Vezio",
+  "s": "Wikimedia Commons",
+  "a": "Castello di Vezio"
+ },
+ "Villa Monastero Varenna": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Villa_monastero.jpg/500px-Villa_monastero.jpg",
+  "t": "Villa Monastero",
+  "s": "Wikimedia Commons",
+  "a": "Villa Monastero — jardim botânico"
+ },
+ "Villa Cipressi Varenna": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Varenna_20260811.jpg/500px-Varenna_20260811.jpg",
+  "t": "Varenna",
+  "s": "Wikimedia Commons",
+  "a": "Villa Cipressi"
+ },
+ "Abbazia di Piona Colico": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Piona2.JPG/500px-Piona2.JPG",
+  "t": "Abbazia di Piona",
+  "s": "Wikimedia Commons",
+  "a": "Abbazia Cistercense di Santa Maria di Piona"
+ },
+ "Bagni di Masino Val Masino": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Angolo_di_pace.jpg/500px-Angolo_di_pace.jpg",
+  "t": "Val di Mello",
+  "s": "Wikimedia Commons",
+  "a": "Trilha Bagni di Masino › Cascata del Ferro"
+ },
+ "Galerie am Splugenpass": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Spl%C3%BCgenpass_August_2019.jpg/500px-Spl%C3%BCgenpass_August_2019.jpg",
+  "t": "Splügenpass",
+  "s": "Wikimedia Commons",
+  "a": "Galerie am Splügenpass"
+ },
+ "Viamala Schlucht Thusis": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Viamala01.jpg/500px-Viamala01.jpg",
+  "t": "Viamala",
+  "s": "Wikimedia Commons",
+  "a": "Viamala-Schlucht (Garganta de Viamala)"
+ },
+ "Kirche St Maria und Michael Churwalden": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/St._Maria_und_Michael_1795.jpg/500px-St._Maria_und_Michael_1795.jpg",
+  "t": "Kloster Churwalden",
+  "s": "Wikimedia Commons",
+  "a": "Kirche St. Maria und Michael (Churwalden)"
+ },
+ "Lindt Home of Chocolate Kilchberg": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Z%C3%BCrichsee_-_Kilchberg_Lindt_%26_Spr%C3%BCngli_IMG_0227.JPG/500px-Z%C3%BCrichsee_-_Kilchberg_Lindt_%26_Spr%C3%BCngli_IMG_0227.JPG",
+  "t": "Lindt & Sprüngli",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Lindt Home of Chocolate — Kilchberg"
+ },
+ "Grossmunster Zurich": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Z%C3%BCrich_-_Grossm%C3%BCnster_IMG_0237.jpg/500px-Z%C3%BCrich_-_Grossm%C3%BCnster_IMG_0237.jpg",
+  "t": "Grossmünster",
+  "s": "Wikimedia Commons",
+  "a": "Altstadt: Lindenhof, Grossmünster e Fraumünster"
+ },
+ "Bahnhofstrasse Zurich": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Credit_Suisse_corporate_headquarters_Z%C3%BCrich%2C_north_view_%282009%29.jpg/500px-Credit_Suisse_corporate_headquarters_Z%C3%BCrich%2C_north_view_%282009%29.jpg",
+  "t": "Bahnhofstrasse (Zürich)",
+  "s": "Wikimedia Commons",
+  "a": "Bahnhofstrasse e o lago"
+ },
+ "Hiltl Zurich Sihlstrasse": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Hiltl_Z%C3%BCrich.jpg/500px-Hiltl_Z%C3%BCrich.jpg",
+  "t": "Hiltl (Restaurant)",
+  "s": "Wikimedia Commons",
+  "a": "Hiltl (o restaurante vegetariano mais antigo do mundo, 1898)"
+ },
+ "Uetliberg Zurich": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/%C3%9Cetliberg.jpg/500px-%C3%9Cetliberg.jpg",
+  "t": "Uetliberg",
+  "s": "Wikimedia Commons",
+  "a": "Uetliberg — a montanha de Zurique"
+ },
+ "Walensee Weesen": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Walensee_2024.jpg/500px-Walensee_2024.jpg",
+  "t": "Walensee",
+  "s": "Wikimedia Commons",
+  "a": "Walensee — mirante de Weesen / Betlis"
+ },
+ "Schattenburg Feldkirch": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Feldkirch_Schattenburg.jpg/500px-Feldkirch_Schattenburg.jpg",
+  "t": "Schattenburg",
+  "s": "Wikimedia Commons",
+  "a": "Feldkirch — Schattenburg e centro medieval"
+ },
+ "Ausblick Schloss Vaduz": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Liechtenstein_asv2022-10_img22_Vaduz_Schloss.jpg/500px-Liechtenstein_asv2022-10_img22_Vaduz_Schloss.jpg",
+  "t": "Schloss Vaduz",
+  "s": "Wikimedia Commons",
+  "a": "⭐ 10h07 EXATAS — Ausblick Schloss Vaduz"
+ },
+ "Kathedrale St Florin Vaduz": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Liechtenstein_asv2022-10_img21_Vaduz_Kathedrale_StFlorin.jpg/500px-Liechtenstein_asv2022-10_img21_Vaduz_Kathedrale_StFlorin.jpg",
+  "t": "Kathedrale von Liechtenstein",
+  "s": "Wikimedia Commons",
+  "a": "Kathedrale St. Florin"
+ },
+ "Aussichtspunkt Kanzile Vaduz": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Rheintal_bei_Vaduz01.jpg/500px-Rheintal_bei_Vaduz01.jpg",
+  "t": "Rheintal bei Vaduz01.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Aussichtspunkt Känzile"
+ },
+ "Aussichtspunkt Kanzel Innsbruck": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Nordkette-panorama.jpg/500px-Nordkette-panorama.jpg",
+  "t": "Nordkette-panorama.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Innsbruck — Aussichtspunkt Kanzel"
+ },
+ "Passo Pordoi": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Pordoi_Pass_-_Canazei%2C_Trento%2C_Italy_-_August_12%2C_2013_03.jpg/500px-Pordoi_Pass_-_Canazei%2C_Trento%2C_Italy_-_August_12%2C_2013_03.jpg",
+  "t": "Passo Pordoi",
+  "s": "Wikimedia Commons",
+  "a": "Passo Pordoi (2.239 m) + opcional Sass Pordoi"
+ },
+ "Passo Falzarego": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Passo_di_Falzarego.jpg/500px-Passo_di_Falzarego.jpg",
+  "t": "Passo di Falzarego",
+  "s": "Wikimedia Commons",
+  "a": "Passo Falzarego"
+ },
+ "Lago di Braies Pragser Wildsee": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Pragser_Wildsee_Seekofel_von_Bucht.jpg/500px-Pragser_Wildsee_Seekofel_von_Bucht.jpg",
+  "t": "Lago di Braies",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Lago di Braies (Pragser Wildsee)"
+ },
+ "Forcella Lavaredo Tre Cime": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Tre_Cime_di_Lavaredo1.jpg/500px-Tre_Cime_di_Lavaredo1.jpg",
+  "t": "Tre Cime di Lavaredo",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Trilha Rifugio Auronzo › Rifugio Lavaredo › Forcella Lavaredo"
+ },
+ "Rifugio Auronzo": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Rifugio_Auronzo_1.JPG/500px-Rifugio_Auronzo_1.JPG",
+  "t": "Rifugio Auronzo 1.JPG",
+  "s": "Wikimedia Commons",
+  "a": "Pausa no Rifugio Auronzo"
+ },
+ "Schloss Bruck Lienz": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Schloss_Bruck.JPG/500px-Schloss_Bruck.JPG",
+  "t": "Schloss Bruck (Lienz)",
+  "s": "Wikimedia Commons",
+  "a": "Lienz — Schloss Bruck e centro histórico"
+ },
+ "Soteska Vintgar Bled": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Vintgar.jpg/500px-Vintgar.jpg",
+  "t": "Blejski vintgar",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Soteska Vintgar (Garganta de Vintgar)"
+ },
+ "Mala Osojnica Bled": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Bled_Overview.JPG/500px-Bled_Overview.JPG",
+  "t": "Blejsko jezero",
+  "s": "Wikimedia Commons",
+  "a": "Mala Osojnica — o mirante do cartão-postal"
+ },
+ "Lake Bled Slovenia": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Panorama_Bled_02.jpg/500px-Panorama_Bled_02.jpg",
+  "t": "Panorama Bled 02.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Volta a pé pelo Lago Bled"
+ },
+ "Blejski otok Bled Island": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Bled_island_from_above.jpg/500px-Bled_island_from_above.jpg",
+  "t": "Blejski otok",
+  "s": "Wikimedia Commons",
+  "a": "Pletna até a Ilha de Bled (Blejski otok)"
+ },
+ "Blejski grad Bled Castle": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Blejski_grad_-_posnetek_iz_balona_-_2023-07-08.jpg/500px-Blejski_grad_-_posnetek_iz_balona_-_2023-07-08.jpg",
+  "t": "Blejski grad",
+  "s": "Wikimedia Commons",
+  "a": "Blejski grad — Castelo de Bled"
+ },
+ "Postojnska jama Postojna Cave": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Postojnska_jama.png/500px-Postojnska_jama.png",
+  "t": "Postojnska jama",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Postojnska jama (Caverna de Postojna)"
+ },
+ "Predjamski grad Predjama Castle": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/El_Castillo_de_Predjama.JPG/500px-El_Castillo_de_Predjama.JPG",
+  "t": "Grad Predjama",
+  "s": "Wikimedia Commons",
+  "a": "Predjamski grad — Castelo de Predjama"
+ },
+ "Presernov trg Ljubljana": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Tromostovje_in_Pre%C5%A1ernov_trg_%28Tromostovje_and_Pre%C5%A1eren_Square%29.jpg/500px-Tromostovje_in_Pre%C5%A1ernov_trg_%28Tromostovje_and_Pre%C5%A1eren_Square%29.jpg",
+  "t": "Prešernov trg, Ljubljana",
+  "s": "Wikimedia Commons",
+  "a": "Centro histórico: Prešernov trg, Tromostovje e Zmajski most"
+ },
+ "Ljubljana Central Market Plecnik": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Ljubljana_made_by_Janez_Kotar.jpg/500px-Ljubljana_made_by_Janez_Kotar.jpg",
+  "t": "Ljubljana",
+  "s": "Wikimedia Commons",
+  "a": "Mercado Central de Plečnik e margem do Ljubljanica"
+ },
+ "Ljubljanski grad Ljubljana Castle": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Ljubljanski_grad_in_Grajski_gri%C4%8D.jpg/500px-Ljubljanski_grad_in_Grajski_gri%C4%8D.jpg",
+  "t": "Ljubljanski grad",
+  "s": "Wikimedia Commons",
+  "a": "Ljubljanski grad — Castelo de Liubliana"
+ },
+ "Tivoli Park Ljubljana": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Grad_Tivoli-Ljubljana.JPG/500px-Grad_Tivoli-Ljubljana.JPG",
+  "t": "Park Tivoli, Ljubljana",
+  "s": "Wikimedia Commons",
+  "a": "Parque Tivoli ao entardecer"
+ },
+ "Pula Arena Amphitheater": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Pula_Arena_%282024-10-10_1%29.jpg/500px-Pula_Arena_%282024-10-10_1%29.jpg",
+  "t": "Pula Arena",
+  "s": "Wikimedia Commons",
+  "a": "Arena de Pula (Anfiteatro Romano)"
+ },
+ "Augustov hram Temple of Augustus Pula": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Templo_de_Augusto%2C_Pula%2C_Croacia%2C_2017-04-17%2C_DD_71-73_HDR.jpg/500px-Templo_de_Augusto%2C_Pula%2C_Croacia%2C_2017-04-17%2C_DD_71-73_HDR.jpg",
+  "t": "Augustov hram",
+  "s": "Wikimedia Commons",
+  "a": "Templo de Augusto (Augustov hram) e Fórum"
+ },
+ "Pulski Kastel Pula Citadel": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Pula-kastel.JPG/500px-Pula-kastel.JPG",
+  "t": "Pula-kastel.JPG",
+  "s": "Wikimedia Commons",
+  "a": "Pulski Kaštel — Cidadela de Pula"
+ },
+ "Euphrasian Basilica Porec": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Eufrazijeva_bazilika_5.JPG/500px-Eufrazijeva_bazilika_5.JPG",
+  "t": "Eufrazijeva bazilika",
+  "s": "Wikimedia Commons",
+  "a": "Poreč — Basílica Eufrasiana (UNESCO)"
+ },
+ "Piran Slovenia Tartini Square": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Tartini_Square_from_above%2C_Piran%2C_May_2009.jpg/500px-Tartini_Square_from_above%2C_Piran%2C_May_2009.jpg",
+  "t": "Tartinijev trg",
+  "s": "Wikimedia Commons",
+  "a": "Piran — a joia veneziana da Eslovênia"
+ },
+ "Piazza Unita d Italia Trieste": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/PiazzaUnit%C3%A0_1.jpg/500px-PiazzaUnit%C3%A0_1.jpg",
+  "t": "Piazza Unità d'Italia",
+  "s": "Wikimedia Commons",
+  "a": "Trieste — Piazza Unità d'Italia e Molo Audace"
+ },
+ "Piazza San Marco Venezia": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Piazza_San_Marco_%28Venice%29_at_night-msu-2021-6449-.jpg/500px-Piazza_San_Marco_%28Venice%29_at_night-msu-2021-6449-.jpg",
+  "t": "Piazza San Marco",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Piazza San Marco vazia"
+ },
+ "Palazzo Ducale Venezia": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/%28Venice%29_Doge%27s_Palace_facing_the_sea.jpg/500px-%28Venice%29_Doge%27s_Palace_facing_the_sea.jpg",
+  "t": "Palazzo Ducale (Venezia)",
+  "s": "Wikimedia Commons",
+  "a": "Palazzo Ducale (Palácio Ducal)"
+ },
+ "Ponte di Rialto Venezia": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Rialto_Bridge_at_night2.jpg/500px-Rialto_Bridge_at_night2.jpg",
+  "t": "Ponte di Rialto",
+  "s": "Wikimedia Commons",
+  "a": "Ponte de Rialto e mercado"
+ },
+ "Dorsoduro Venezia": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Fondamenta_Zattere_ai_Saloni_Dorsoduro_Venezia.jpg/500px-Fondamenta_Zattere_ai_Saloni_Dorsoduro_Venezia.jpg",
+  "t": "Fondamenta Zattere ai Saloni Dorsoduro Venezia.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Dorsoduro — o bairro que Veneza guarda para si"
+ },
+ "Vaporetto Line 1 Grand Canal Venice": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Aerial_view_Venice_07_2017_4995.jpg/500px-Aerial_view_Venice_07_2017_4995.jpg",
+  "t": "Canal Grande",
+  "s": "Wikimedia Commons",
+  "a": "Vaporetto linha 1 pelo Grande Canal"
+ },
+ "Parco di San Giuliano Mestre": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Parco_san_giuliano.JPG/500px-Parco_san_giuliano.JPG",
+  "t": "Parco San Giuliano",
+  "s": "Wikimedia Commons",
+  "a": "Parco di San Giuliano — pôr do sol sobre a laguna"
+ },
+ "Arena di Verona": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Arena-XE3F2406a.jpg/500px-Arena-XE3F2406a.jpg",
+  "t": "Arena di Verona",
+  "s": "Wikimedia Commons",
+  "a": "Verona — Arena, Piazza delle Erbe e Casa di Giulietta"
+ },
+ "Duomo di Milano": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Milan_Cathedral_from_Piazza_del_Duomo.jpg/500px-Milan_Cathedral_from_Piazza_del_Duomo.jpg",
+  "t": "Duomo di Milano",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Duomo di Milano + terraços"
+ },
+ "Galleria Vittorio Emanuele II Milano": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Galleria_Milano_%28179532365%29-edit.jpg/500px-Galleria_Milano_%28179532365%29-edit.jpg",
+  "t": "Galleria Vittorio Emanuele II",
+  "s": "Wikimedia Commons",
+  "a": "Galleria Vittorio Emanuele II e Piazza dei Mercanti"
+ },
+ "Castello Sforzesco Milano": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Castello_Sforzesco_da_alto.jpg/500px-Castello_Sforzesco_da_alto.jpg",
+  "t": "Castello Sforzesco",
+  "s": "Wikimedia Commons",
+  "a": "⭐ Castello Sforzesco"
+ },
+ "Parco Sempione Milano": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Veduta_dell%27Arco_della_Pace_d_Milano_dal_Parco_Sempione._Architetto_Cagnola.jpg/500px-Veduta_dell%27Arco_della_Pace_d_Milano_dal_Parco_Sempione._Architetto_Cagnola.jpg",
+  "t": "Arco della Pace",
+  "s": "Wikimedia Commons",
+  "a": "Parco Sempione e Arco della Pace"
+ },
+ "Navigli Milano": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/4045_-_Milano_-_Naviglio_Grande_-_Foto_Giovanni_Dall%27Orto%2C_7-July-2007.jpg/500px-4045_-_Milano_-_Naviglio_Grande_-_Foto_Giovanni_Dall%27Orto%2C_7-July-2007.jpg",
+  "t": "4045 - Milano - Naviglio Grande - Foto Giovanni Dall'Orto, 7-July-2007.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Navigli — os canais de Leonardo"
+ },
+ "Lago di Misurina": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Lago_di_misurina.jpg/500px-Lago_di_misurina.jpg",
+  "t": "Lago di Misurina",
+  "s": "Wikimedia Commons",
+  "a": "Lago di Misurina"
+ },
+ "Hauptplatz Villach": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Villach_Innenstadt_Hauptplatz_SW-Ansicht_03082015_6487.jpg/500px-Villach_Innenstadt_Hauptplatz_SW-Ansicht_03082015_6487.jpg",
+  "t": "Villach Innenstadt Hauptplatz SW-Ansicht 03082015 6487.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Centro histórico de Villach"
+ },
+ "Straza Bled": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Ski_Bled_Stra%C5%BEa.JPG/500px-Ski_Bled_Stra%C5%BEa.JPG",
+  "t": "Ski Bled Straža.JPG",
+  "s": "Wikimedia Commons",
+  "a": "Straža Bled — mirante sul"
+ },
+ "Casa Toni calle de la Cruz Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Casa_Toni_%28Madrid%29.jpg/500px-Casa_Toni_%28Madrid%29.jpg",
+  "t": "Casa Toni (Madrid).jpg",
+  "s": "Wikimedia Commons",
+  "a": "Casa Toni (calle Cruz)"
+ },
+ "Passeggiata degli Innamorati Varenna": {
+  "u": "https://live.staticflickr.com/65535/49593830658_e969c465d2_z.jpg",
+  "t": "Passeggiata degli Innamorati @ Varenna",
+  "s": "Openverse · flickr",
+  "by": "*_*",
+  "l": "by",
+  "a": "Passeggiata degli Innamorati"
+ },
+ "Hotel Krone Churwalden": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Zentralbibliothek_Z%C3%BCrich_-_Churwalden_mit_Hotel_Krone_und_Kurhaus_-_991010416449705501.jpg/500px-Zentralbibliothek_Z%C3%BCrich_-_Churwalden_mit_Hotel_Krone_und_Kurhaus_-_991010416449705501.jpg",
+  "t": "Zentralbibliothek Zürich - Churwalden mit Hotel Krone und Kurhaus - 991010416449705501.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Hotel Krone — Aktiv & Erholt"
+ },
+ "Hotel Bodenhaus Splugen": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Bodenhaus_Spl%C3%BCgen.jpg/500px-Bodenhaus_Spl%C3%BCgen.jpg",
+  "t": "Bodenhaus Splügen.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Hotel Bodenhaus (Splügen)"
+ },
+ "Zeughauskeller Zurich": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/7234_-_Z%C3%BCrich_-_Zeughauskeller.JPG/500px-7234_-_Z%C3%BCrich_-_Zeughauskeller.JPG",
+  "t": "7234 - Zürich - Zeughauskeller.JPG",
+  "s": "Wikimedia Commons",
+  "a": "Zeughauskeller"
+ },
+ "restaurant Weesen Walensee": {
+  "u": "https://live.staticflickr.com/65535/49126031878_ed5b078df3_z.jpg",
+  "t": "Weesen - Hotel Restaurant Bahnhof",
+  "s": "Openverse · flickr",
+  "by": "Kecko",
+  "l": "by",
+  "a": "Café/Bistrô em Weesen — prato vegetal"
+ },
+ "Restaurant Torkel Vaduz": {
+  "u": "https://live.staticflickr.com/8210/29267212911_84a9011a05_z.jpg",
+  "t": "Abendessen im Restaurant Torkel in Vaduz beim mehrfach ausgezeichneten Küchenchef Ivo Berger: -Amuse Bouche: G",
+  "s": "Openverse · flickr",
+  "by": "hoomygumb",
+  "l": "by-nc-sa",
+  "a": "Torkel Vaduz"
+ },
+ "ristorante Pozza di Fassa": {
+  "u": "https://live.staticflickr.com/65535/53140690238_c536e9247b.jpg",
+  "t": "Pozza di Fassa (TN), 2023, Il ristorante Vecchio Mulino.",
+  "s": "Openverse · flickr",
+  "by": "Fiore S. Barbato",
+  "l": "by-nc-nd",
+  "a": "Trattoria ladina em Pozza di Fassa"
+ },
+ "Rifugio Passo Falzarego": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Rifugio_Lagazuoi%2C_Passo_Falzarego_BL%2C_Dolomiti%2C_Italia_by_Marco_Zaffignani.jpg/500px-Rifugio_Lagazuoi%2C_Passo_Falzarego_BL%2C_Dolomiti%2C_Italia_by_Marco_Zaffignani.jpg",
+  "t": "Rifugio Lagazuoi, Passo Falzarego BL, Dolomiti, Italia by Marco Zaffignani.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Rifugio — polenta com cogumelos e legumes"
+ },
+ "Hauptplatz Lienz Austria": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Lienz_-_Hauptplatz2.JPG/500px-Lienz_-_Hauptplatz2.JPG",
+  "t": "Lienz - Hauptplatz2.JPG",
+  "s": "Wikimedia Commons",
+  "a": "Café/bistrô da Hauptplatz — prato vegetal"
+ },
+ "restaurant Hauptplatz Villach": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Villach_-_Hauptplatz_12.JPG/500px-Villach_-_Hauptplatz_12.JPG",
+  "t": "Villach - Hauptplatz 12.JPG",
+  "s": "Wikimedia Commons",
+  "a": "Restaurante da Hauptplatz — opção vegetal"
+ },
+ "Klobasarna Ljubljana": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Klobasarna_%2837927692355%29.jpg/500px-Klobasarna_%2837927692355%29.jpg",
+  "t": "Klobasarna (37927692355).jpg",
+  "s": "Wikimedia Commons",
+  "a": "Klobasarna (Ciril-Metodov trg)"
+ },
+ "Gostilna Sokol Ljubljana": {
+  "u": "https://live.staticflickr.com/122/301409841_ff5339109c.jpg",
+  "t": "Gostilna Sokol, Ljubljana",
+  "s": "Openverse · flickr",
+  "by": "jmcnally",
+  "l": "by-nc",
+  "a": "Gostilna Sokol"
+ },
+ "restaurant Kandlerova Pula": {
+  "u": "https://live.staticflickr.com/4648/39855374161_e00c5c65c4_z.jpg",
+  "t": "facefood, Kandlerova, Pula (122FAITH_7373)",
+  "s": "Openverse · flickr",
+  "by": "Janko Hoener",
+  "l": "by-sa",
+  "a": "Restaurantes do centro com menu vegetal"
+ },
+ "Cantina Do Mori Venezia": {
+  "u": "https://live.staticflickr.com/7015/6474877953_cf3a19bc8f_z.jpg",
+  "t": "Cantina do Mori - DSC 2738 ep",
+  "s": "Openverse · flickr",
+  "by": "Eric.Parker",
+  "l": "by-nc",
+  "a": "Bacaro de cicchetti (Cantina Do Mori / Do Spade)"
+ },
+ "osteria Sottoriva Verona": {
+  "u": "https://live.staticflickr.com/7674/16735675614_694d2171a5_z.jpg",
+  "t": "Osteria Sottoriva, Verona, Italy",
+  "s": "Openverse · flickr",
+  "by": "ScotchBroom",
+  "l": "by-nc",
+  "a": "Osteria veronesa (Piazza Erbe / Sottoriva)"
+ },
+ "Casa Labra Madrid": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Casa_labra.jpg/500px-Casa_labra.jpg",
+  "t": "Casa labra.jpg",
+  "s": "Wikimedia Commons",
+  "a": "La Bola / Casa Labra (centro)"
+ },
+ "Rovinj Old Town Croatia": {
+  "u": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Rovinj_Altstadt.jpg/500px-Rovinj_Altstadt.jpg",
+  "t": "Rovinj Altstadt.jpg",
+  "s": "Wikimedia Commons",
+  "a": "Rovinj — a vila veneziana da Ístria"
+ }
+};
 
 /* --- Dicas culturais / idioma, reaproveitadas por país --- */
 const TIPS = {
@@ -1261,11 +1906,43 @@ function renderTotals(){
   $('#hdrBudget').textContent = (food+extra).toLocaleString('pt-BR')+' estimados';
 }
 
+/* ---------------- Miniaturas (foto de licença livre; ícone como reserva) ---------------- */
+function photoOf(q){ return (q && typeof PHOTOS==='object' && PHOTOS[q]) || null; }
+
+const esc = v => String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* Se a foto não carregar (offline, imagem removida da fonte), cai para o ícone da categoria. */
+function thumbFail(img){
+  const box = img.closest('.thumb'); if (!box) return;
+  const bg = box.dataset.bg || 'rgba(255,255,255,.05)';
+  const ic = box.dataset.icon || 'fa-image';
+  const cl = box.dataset.color || 'text-white/70';
+  box.style.background = bg;
+  box.innerHTML = '<div class="thumb-fallback"><i class="fa-solid ' + ic + ' ' + cl + ' opacity-80"></i></div>';
+}
+window.thumbFail = thumbFail;
+
+function thumb(q, size, icon, kind){
+  const s = K_STYLE[kind] || K_STYLE.sight;
+  const ph = photoOf(q);
+  const data = `data-icon="${esc(icon)}" data-color="${esc(s.c)}" data-bg="${esc(s.bg)}"`;
+  if (ph){
+    const cred = (ph.t||'') + (ph.by ? ' — ' + ph.by : '') + (ph.l ? ' (' + ph.l + ')' : '') + ' · ' + (ph.s||'Wikimedia Commons');
+    return `<div class="thumb ${size}" ${data}>
+      <img src="${esc(ph.u)}" alt="${esc(ph.a||'')}" title="${esc(cred)}"
+           loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="thumbFail(this)">
+    </div>`;
+  }
+  return `<div class="thumb ${size}" ${data} style="background:${s.bg};border-color:${s.b}">
+    <div class="thumb-fallback"><i class="fa-solid ${icon} ${s.c} opacity-80"></i></div>
+  </div>`;
+}
+
 /* ---------------- Cartões auxiliares ---------------- */
 function metricCard(icon, label, value, sub, color){
   return `<div class="glass-soft rounded-2xl p-3 md:p-3.5">
-    <div class="flex items-center gap-2 text-[10px] md:text-[11px] uppercase tracking-wide text-white/50">
-      <i class="fa-solid ${icon} ${color}"></i>${label}
+    <div class="flex items-center gap-2 text-[10px] md:text-[11px] uppercase tracking-wide text-white/50 min-w-0">
+      <i class="fa-solid ${icon} ${color} shrink-0"></i><span class="min-w-0 break-words">${label}</span>
     </div>
     <div class="font-display font-extrabold text-lg md:text-xl mt-1 leading-none">${value}</div>
     ${sub ? `<div class="text-[10px] md:text-[11px] text-white/45 mt-1 leading-snug">${sub}</div>` : ''}
@@ -1281,20 +1958,25 @@ function alertRow(a){
 }
 
 function foodOptions(opts){
-  return `<div class="grid sm:grid-cols-2 gap-2.5 mt-3">
+  return `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
     ${opts.map(o=>{
       const veg = o.k === 'vegano';
       const col = veg ? 'emerald' : 'orange';
       return `<a href="${mapsUrl(o.q)}" target="_blank" rel="noopener"
-        class="card-link block rounded-xl p-3 glass-soft border" style="border-color:${veg?'rgba(52,211,153,.3)':'rgba(251,146,60,.3)'}">
-        <div class="flex items-center justify-between gap-2 mb-1.5">
+        class="card-link block min-w-0 rounded-xl p-3 glass-soft border" style="border-color:${veg?'rgba(52,211,153,.3)':'rgba(251,146,60,.3)'}">
+        <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mb-1.5">
           <span class="chip !py-0.5 !text-[10px]" style="background:${veg?'rgba(52,211,153,.16)':'rgba(251,146,60,.16)'};border-color:${veg?'rgba(52,211,153,.4)':'rgba(251,146,60,.4)'}">
             <i class="fa-solid ${veg?'fa-leaf text-emerald-300':'fa-drumstick-bite text-orange-300'}"></i>${veg?'Vegano':'Onívoro'}
           </span>
           <span class="text-[11px] font-bold text-${col}-200 whitespace-nowrap">${o.price}</span>
         </div>
-        <div class="font-semibold text-[13px] leading-snug mb-1">${o.n}</div>
-        <div class="text-[11.5px] text-white/60 leading-relaxed">${o.txt}</div>
+        <div class="flex gap-2.5 items-start">
+          ${thumb(o.q,'t-sm','fa-utensils','food')}
+          <div class="min-w-0 flex-1">
+            <div class="font-semibold text-[13px] leading-snug mb-1">${o.n}</div>
+            <div class="text-[11.5px] text-white/60 leading-relaxed">${o.txt}</div>
+          </div>
+        </div>
         <div class="mt-2 text-[10.5px] text-sky-300 font-semibold"><i class="fa-solid fa-location-dot mr-1"></i>Abrir no Maps</div>
       </a>`;
     }).join('')}
@@ -1304,19 +1986,20 @@ function foodOptions(opts){
 function tlItem(it){
   const s = K_STYLE[it.k] || K_STYLE.sight;
   const href = it.dir ? dirUrl(it.dir.o, it.dir.d) : (it.q ? mapsUrl(it.q) : null);
+  const chips = `${it.dur  ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-regular fa-clock text-sky-300"></i>${it.dur}</span>` : ''}${it.cost ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-solid fa-euro-sign text-amber-300"></i>${it.cost}</span>` : ''}`;
+
   const inner = `
-    <div class="flex items-start justify-between gap-3 min-w-0">
+    <div class="flex items-start gap-3 min-w-0">
+      ${it.opts ? '' : thumb(it.q, 't-md', it.ic, it.k)}
       <div class="min-w-0 flex-1">
         <h4 class="font-display font-bold text-[14px] md:text-[15px] leading-snug txt-balance">${it.title}</h4>
-        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-          ${it.dur  ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-regular fa-clock text-sky-300"></i>${it.dur}</span>` : ''}
-          ${it.cost ? `<span class="chip !py-0.5 !text-[10px]"><i class="fa-solid fa-euro-sign text-amber-300"></i>${it.cost}</span>` : ''}
-        </div>
+        <div class="hidden md:flex flex-wrap items-center gap-1.5 mt-1.5">${chips}</div>
       </div>
-      ${href ? `<span class="btn-map shrink-0 hidden sm:inline-flex"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Rota':'Maps'}</span>` : ''}
+      ${href ? `<span class="btn-map shrink-0 hidden md:inline-flex"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Rota':'Maps'}</span>` : ''}
     </div>
-    ${it.txt ? `<p class="text-[12.5px] md:text-[13px] text-white/68 leading-relaxed mt-2">${it.txt}</p>` : ''}
-    ${href ? `<span class="btn-map sm:hidden mt-2.5 w-full justify-center"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Ver rota no Maps':'Abrir no Maps'}</span>` : ''}`;
+    ${chips ? `<div class="md:hidden flex flex-wrap items-center gap-1.5 mt-2.5">${chips}</div>` : ''}
+    ${it.txt ? `<p class="text-[12.5px] md:text-[13px] text-white/68 leading-relaxed mt-2.5">${it.txt}</p>` : ''}
+    ${href ? `<span class="btn-map md:hidden mt-3 w-full justify-center"><i class="fa-solid ${it.dir?'fa-route':'fa-location-dot'}"></i>${it.dir?'Ver rota no Maps':'Abrir no Maps'}</span>` : ''}`;
 
   const body = it.opts
     ? `<div class="glass rounded-2xl p-3.5 md:p-4">${inner}${foodOptions(it.opts)}</div>`
@@ -1434,10 +2117,7 @@ function renderDay(i){
   const hotelCard = `<a href="${mapsUrl(d.hotel.q)}" target="_blank" rel="noopener"
     class="card-link block glass rounded-3xl p-4 md:p-5 fade-up" style="border-color:rgba(251,113,133,.32)">
     <div class="flex items-start gap-3.5">
-      <div class="w-11 h-11 md:w-12 md:h-12 rounded-2xl grid place-items-center shrink-0"
-           style="background:rgba(251,113,133,.16);border:1px solid rgba(251,113,133,.4)">
-        <i class="fa-solid fa-bed text-rose-300 text-lg"></i>
-      </div>
+      ${thumb(d.hotel.q,'t-lg','fa-bed','hotel')}
       <div class="min-w-0 flex-1">
         <div class="text-[10px] uppercase tracking-wide text-white/45">Pernoite de ${d.date}</div>
         <h3 class="font-display font-bold text-[15px] md:text-lg leading-snug mt-0.5">${d.hotel.n}</h3>
