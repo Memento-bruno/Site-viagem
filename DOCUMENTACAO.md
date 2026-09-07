@@ -169,9 +169,13 @@ tela de 1.800 px esticaria as linhas do cronograma além do confortável para le
 
 ### Barra de painéis auxiliares
 
-Cinco ícones no topo do dia — roupas, estacionamento, transporte, etiqueta local
-e links rápidos. Cada um abre a sua seção logo abaixo, um de cada vez; tocar no
-ícone aberto fecha.
+Cinco ícones logo abaixo do cabeçalho do dia — roupas, estacionamento,
+transporte, etiqueta local e links rápidos. Cada um abre a sua seção
+imediatamente abaixo, um de cada vez; tocar no ícone aberto fecha.
+
+Ficam depois do cabeçalho, e não acima dele, porque quem chega ao topo da página
+quer primeiro saber que dia é, onde está e quanto o dia custa. Os painéis são
+consulta pontual; o cabeçalho é a identidade da etapa.
 
 Antes essas seções ocupavam uma terceira coluna no desktop e, no celular,
 ficavam depois do cronograma inteiro — quem quisesse a regra de estacionamento

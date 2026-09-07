@@ -2914,7 +2914,9 @@ function renderDay(i){
     ${groups}
   </section>`;
 
-  /* Barra de ícones dos painéis auxiliares — preenchida por montarAux */
+  /* Barra de ícones dos painéis auxiliares — preenchida por montarAux.
+     Vem depois do cabeçalho: quem chega ao topo quer primeiro saber que dia
+     é, onde está e quanto custa; os painéis são consulta, não identidade. */
   const auxBar = `<section id="auxBar" class="fade-up"></section>`;
 
   /* Navegação anterior/próximo */
@@ -2931,7 +2933,7 @@ function renderDay(i){
     </button>
   </div>`;
 
-  $('#mainPanel').innerHTML = auxBar + head + hotelCard + alerts + gastos + timeline + nav;
+  $('#mainPanel').innerHTML = head + auxBar + hotelCard + alerts + gastos + timeline + nav;
 
   montarAux(d);
 
