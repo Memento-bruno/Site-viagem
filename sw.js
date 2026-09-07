@@ -4,7 +4,7 @@
    dos Grisões e das Dolomitas o sinal cai, e roaming na Suíça é caro.
    ===================================================================== */
 
-const VERSAO = '2026-v3';
+const VERSAO = '2026-v4';
 const CACHE  = `roteiro-${VERSAO}`;
 
 /* Arquivos próprios: sempre em cache, atualizados em segundo plano. */
@@ -53,14 +53,29 @@ self.addEventListener('activate', e => {
   })());
 });
 
-/* Busca uma URL e guarda no cache. Cross-origin sem CORS vira resposta
-   opaca — ela não pode ser lida por JS, mas é servível ao navegador. */
+/* Busca uma URL e guarda no cache, PRESERVANDO O MODO da requisição.
+
+   Forçar no-cors em tudo que é cross-origin parece inofensivo, mas quebra
+   fontes: o navegador pede @font-face em modo CORS e RECUSA usar uma resposta
+   opaca para desenhar glifos. O sintoma é todo ícone virar quadrado com X no
+   momento em que o worker assume o controle — online inclusive.
+
+   Então tentamos a requisição como o navegador a fez. Só se ela falhar (servidor
+   sem cabeçalho CORS) caímos para no-cors, que serve para imagem e nunca para
+   fonte. */
 async function buscarEGuardar(req, cache) {
   const url = new URL(req.url);
   const mesmaOrigem = url.origin === self.location.origin;
-  const resp = await fetch(mesmaOrigem ? req : new Request(req.url, { mode: 'no-cors', credentials: 'omit' }));
-  if (resp && (resp.ok || resp.type === 'opaque')) await cache.put(req, resp.clone());
-  return resp;
+  try {
+    const resp = await fetch(req);
+    if (resp && (resp.ok || resp.type === 'opaque')) await cache.put(req, resp.clone());
+    return resp;
+  } catch (e) {
+    if (mesmaOrigem) throw e;
+    const resp = await fetch(new Request(req.url, { mode: 'no-cors', credentials: 'omit' }));
+    if (resp && (resp.ok || resp.type === 'opaque')) await cache.put(req, resp.clone());
+    return resp;
+  }
 }
 
 self.addEventListener('fetch', e => {
