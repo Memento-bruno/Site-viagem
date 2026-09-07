@@ -9,6 +9,7 @@ de setembro de 2026.
 Abre no dia de hoje, funciona sem internet, mostra quanto o dia custa em euro e
 em real, avisa a que horas o sol se põe e leva direto ao Google Maps ou à
 bilheteria oficial de cada atração.
+E diz o que vestir de manhã e de tarde, com base na temperatura do dia.
 
 | | |
 |---|---|
@@ -16,6 +17,7 @@ bilheteria oficial de cada atração.
 | Blocos de cronograma | 201 |
 | Fotos de licença livre | 99 |
 | Ingressos com link oficial | 24 |
+| Peças de roupa desenhadas | 23 |
 | Custo estimado (2 pessoas) | € 3.662 |
 
 ## Uso

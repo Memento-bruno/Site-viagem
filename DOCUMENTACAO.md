@@ -16,6 +16,7 @@ Liechtenstein, Eslovênia e Croácia, de 10 a 28 de setembro de 2026.
 - [Estrutura de dados](#estrutura-de-dados)
 - [Funcionalidades](#funcionalidades)
 - [Modelo de custos](#modelo-de-custos)
+- [Recomendação de roupas](#recomendação-de-roupas)
 - [Dados externos e como foram obtidos](#dados-externos-e-como-foram-obtidos)
 - [Publicação](#publicação)
 - [Método de verificação](#método-de-verificação)
@@ -39,6 +40,7 @@ leva direto ao Google Maps ou à bilheteria oficial de cada atração.
 | Refeições com opção vegana e onívora | 39 |
 | Fotos de licença livre | 99 |
 | Ingressos com link oficial | 24, sendo 10 com hora marcada |
+| Peças de roupa desenhadas | 23, em 4 faixas de temperatura |
 | Quilometragem | 2.627 km |
 | Custo estimado, 2 pessoas | € 3.662 (média de € 193/dia) |
 
@@ -138,6 +140,9 @@ O campo `q` é a chave que amarra tudo: gera o link do Maps, indexa a foto em
 | `PHOTOS` | 99 fotos indexadas pela mesma chave `q` |
 | `BILHETES` | 24 endereços oficiais de venda, com preço e se tem hora marcada |
 | `PARK` / `TIPS` | regras de estacionamento e dicas culturais, reaproveitadas por país |
+| `PECA` | catálogo de 23 peças de roupa: símbolo SVG, rótulo curto e explicação |
+| `FAIXA_FRIO` / `FAIXA_CALOR` | os quatro degraus de temperatura e o que se veste em cada um |
+| `VESTE_CTX` | o que o roteiro do dia exige além do clima: igreja, trilha, altitude, caverna, água, voo |
 
 ---
 
@@ -183,6 +188,13 @@ Alertas de frio, calor e caminhada longa são gerados desses números.
 
 Cards de atrações com bilheteria mostram preço, aviso de hora marcada e link para
 o site oficial. Os 10 com horário marcado ficam destacados em âmbar.
+
+### O que vestir
+
+Painel recolhido na coluna lateral, um por dia. Fechado mostra só a cidade e as
+duas temperaturas; abre no toque e revela dois looks (masculino e feminino) para
+o frio da manhã e para o calor da tarde, mais a lista do que vai na mochila.
+Detalhado em [Recomendação de roupas](#recomendação-de-roupas).
 
 ---
 
@@ -256,6 +268,68 @@ total de R$ 22.703 para R$ 36.620, o que justifica deixar a escolha visível em
 vez de congelada no código.
 
 ---
+
+## Recomendação de roupas
+
+### Por que dois looks por dia, e não um por cidade
+
+A amplitude térmica do roteiro chega a 12 °C dentro do mesmo dia: 18/09 em
+Cortina tem mínima média de 4 °C e máxima de 15 °C. Quem sai do hotel às 7h
+vestido para a tarde passa frio de manhã, e quem se veste para a manhã carrega
+casaco a tarde inteira. Por isso cada dia mostra **dois** conjuntos — o da
+mínima e o da máxima — e não um "look de Cortina".
+
+Pela mesma razão a recomendação não é um texto fixo por cidade: ela sai do
+`tmax` e do `tmin` que já estavam em `DAYS`, os mesmos números do cabeçalho.
+20 °C em Liubliana pedem a mesma roupa que 20 °C em Zurique.
+
+### Os quatro degraus
+
+| Faixa fria (pela mínima) | | Faixa quente (pela máxima) | |
+|---|---|---|---|
+| ≤ 5 °C | Frio de verdade — três camadas, bota, gorro, luva | ≥ 28 °C | Quente — regata, bermuda/saia, boné |
+| 6–10 °C | Frio — fleece e corta-vento | 24–27 °C | Morno — manga curta, bermuda/vestido |
+| 11–14 °C | Fresco — fleece por cima da camiseta | 19–23 °C | Agradável — manga curta com calça leve |
+| ≥ 15 °C | Ameno — camisa aberta por cima | ≤ 18 °C | Fresco mesmo na máxima — manga longa o dia todo |
+
+Abaixo de 8 °C entra cachecol nos dois looks, independentemente da faixa.
+
+### O que o roteiro acrescenta
+
+`VESTE_CTX` marca, por data, o que a temperatura sozinha não diz:
+
+| Contexto | O que muda |
+|---|---|
+| `igreja` | Almudena, Duomo de Como, igreja da ilha de Bled, San Marco, Duomo de Milão exigem ombros e joelhos cobertos → lenço na mochila |
+| `alto` | Splügen (2.113 m), Pordoi (2.239 m), Tre Cime (2.320 m): aplica −6,5 °C por 1.000 m sobre a máxima do vale e diz o número que sai |
+| `trilha` | Val Masino, Tre Cime, Vintgar: tênis fechado, meia de troca, capa de chuva |
+| `caverna` | Postojna fica a 10 °C o ano inteiro, com 20 °C lá fora |
+| `agua` | Como, Bled, Mužilj: óculos de sol e chinelo no porta-malas |
+| `voo` | vestir o mais pesado em vez de despachar |
+| `walk ≥ 10 km` | tênis amaciado, meia de troca, curativo |
+
+O cálculo de altitude usa a altitude da cidade cuja série de temperatura foi
+medida, não o nível do mar — subtrair 2.239 m de uma média já tomada a 1.224 m
+daria −15 °C em vez dos −7 °C reais.
+
+### Por que desenho e não foto
+
+O pedido era "com fotos". Não deu para atender e o motivo importa: no Wikimedia
+Commons, "winter jacket" devolve *2005 Autumn-Winter Maison Margiela jacket*,
+"wool scarf" devolve um fragmento de lã do século III em Dura-Europos. São peças
+de museu, não orientação de mala. As fotos de "look" com licença livre no
+Flickr, por sua vez, mostram pessoas privadas identificáveis.
+
+As 23 peças são então `<symbol>` SVG desenhados neste projeto, num sprite oculto
+logo após o `<body>`. Custam 4 KB, funcionam offline sem precisar de cache,
+acompanham a cor do tema e mostram *o item* em vez de uma pessoa aleatória.
+
+### Implementação
+
+`<details>` nativo: abre sem JavaScript, fecha sozinho ao trocar de dia (o
+painel é reconstruído) e não precisa de estado. O `summary` é o botão; o
+conteúdo só existe expandido.
+
 
 ## Dados externos e como foram obtidos
 
@@ -336,6 +410,7 @@ Toda alteração passa pela mesma bateria, executada em Chromium via Playwright:
 | Links | formato, hosts e ausência de `<a>` aninhado |
 | Imagens | miniaturas renderizadas e nenhuma quebrada |
 | Runtime | nenhum erro de JavaScript |
+| Painel de roupas | fecha por padrão, abre no clique e chega a ≥ 300 px em 19 dias × 8 larguras; todo chip com rótulo, explicação e desenho renderizado |
 | Offline | rede cortada, recarga, navegação entre dias |
 
 A publicação é confirmada por comparação de hash entre o arquivo local e o que o

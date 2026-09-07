@@ -181,9 +181,49 @@ if (window.tailwind) tailwind.config = {
   details[open] .caret{ transform:rotate(180deg); }
   .caret{ transition:transform .2s ease; }
   .safe-b{ padding-bottom:env(safe-area-inset-bottom); }
+  /* ---------- Peças de roupa ---------- */
+  .pic{
+    width:26px; height:26px; fill:none; stroke:currentColor;
+    stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round;
+  }
+  .peca{
+    display:flex; flex-direction:column; align-items:center; gap:.2rem;
+    width:54px; padding:.4rem .15rem .35rem; border-radius:.55rem;
+    background:rgba(255,255,255,.05); border:1px solid var(--edge-soft);
+    font-size:.6rem; line-height:1.2; text-align:center; color:rgba(231,236,247,.8);
+  }
 </style>
 </head>
 <body class="font-sans antialiased">
+<!-- Pictogramas de roupa. Desenhados aqui porque o Commons só tem peça de
+     museu ("Regenmantel 1919") e foto de look no Flickr é gente identificável.
+     Sendo SVG inline, funcionam offline e acompanham a cor do tema. -->
+<svg id="pecas" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><defs>
+<symbol id="p-camiseta" viewBox="0 0 24 24"><path d="M9 4 L5 5.5 L3 10 L6 11.5 L6.5 9.5 L6.5 21 H17.5 V9.5 L18 11.5 L21 10 L19 5.5 L15 4 C15 6 13.7 6.9 12 6.9 C10.3 6.9 9 6 9 4 Z"/></symbol>
+<symbol id="p-regata" viewBox="0 0 24 24"><path d="M9.4 4 L7 5 L6.5 21 H17.5 L17 5 L14.6 4 C14.6 6.2 13.4 7.1 12 7.1 C10.6 7.1 9.4 6.2 9.4 4 Z"/></symbol>
+<symbol id="p-camisa" viewBox="0 0 24 24"><path d="M9 4 L4.6 5.6 L2.6 16.4 L5.6 17.2 L6.5 13 L6.5 21 H17.5 V13 L18.4 17.2 L21.4 16.4 L19.4 5.6 L15 4 L12 7.4 Z"/><path d="M9 4 L12 7.4 L15 4"/><path d="M12 10 v9.5" stroke-dasharray="1.4 2.2"/><path d="M3.15 14.6 L6.05 15.4 M17.95 15.4 L20.85 14.6"/></symbol>
+<symbol id="p-blusa" viewBox="0 0 24 24"><path d="M9 4.2 L4.8 5.8 L3.2 13.2 L6.1 14 L6.6 11.4 L6.6 21 H17.4 V11.4 L17.9 14 L20.8 13.2 L19.2 5.8 L15 4.2 C15 6.9 13.6 7.9 12 7.9 C10.4 7.9 9 6.9 9 4.2 Z"/></symbol>
+<symbol id="p-mangalonga" viewBox="0 0 24 24"><path d="M9 4 L4.6 5.6 L2.6 16.4 L5.6 17.2 L6.5 13 L6.5 21 H17.5 V13 L18.4 17.2 L21.4 16.4 L19.4 5.6 L15 4 C15 6 13.7 6.9 12 6.9 C10.3 6.9 9 6 9 4 Z"/><path d="M3.15 14.6 L6.05 15.4 M17.95 15.4 L20.85 14.6"/></symbol>
+<symbol id="p-termica" viewBox="0 0 24 24"><path d="M9 4 L4.6 5.6 L2.6 16.4 L5.6 17.2 L6.5 13 L6.5 21 H17.5 V13 L18.4 17.2 L21.4 16.4 L19.4 5.6 L15 4 C15 6 13.7 6.9 12 6.9 C10.3 6.9 9 6 9 4 Z"/><path d="M3.15 14.6 L6.05 15.4 M17.95 15.4 L20.85 14.6"/><path d="M8.6 11.6 q1.7 -1.9 3.4 0 q1.7 1.9 3.4 0"/><path d="M8.6 15.2 q1.7 -1.9 3.4 0 q1.7 1.9 3.4 0"/><path d="M8.6 18.8 q1.7 -1.9 3.4 0 q1.7 1.9 3.4 0"/></symbol>
+<symbol id="p-fleece" viewBox="0 0 24 24"><path d="M9 4 L4.6 5.6 L2.6 16.4 L5.6 17.2 L6.5 13 L6.5 21 H17.5 V13 L18.4 17.2 L21.4 16.4 L19.4 5.6 L15 4 Z"/><path d="M12 4 v17"/><path d="M9 4 L12 6.6 L15 4"/><path d="M8.4 13.4 h2.4 M13.2 13.4 h2.4"/><path d="M3.15 14.6 L6.05 15.4 M17.95 15.4 L20.85 14.6"/></symbol>
+<symbol id="p-cortavento" viewBox="0 0 24 24"><path d="M9 4 L4.6 5.6 L2.6 16.4 L5.6 17.2 L6.5 13 L6.5 21 H17.5 V13 L18.4 17.2 L21.4 16.4 L19.4 5.6 L15 4 Z"/><path d="M12 4 v17"/><path d="M9.4 4.2 C10 6.4 14 6.4 14.6 4.2"/><path d="M3.15 14.6 L6.05 15.4 M17.95 15.4 L20.85 14.6"/><path d="M6.6 18.6 h10.8"/></symbol>
+<symbol id="p-calca" viewBox="0 0 24 24"><path d="M7 3 h10 l0.6 8 L18 21 h-4 L12 12 L10 21 H6 L6.4 11 Z"/><path d="M7 6.5 h10"/></symbol>
+<symbol id="p-bermuda" viewBox="0 0 24 24"><path d="M7 4 h10 l0.5 6 L18 16 h-4.2 L12 10.5 L10.2 16 H6 L6.5 10 Z"/><path d="M7 7 h10"/></symbol>
+<symbol id="p-saia" viewBox="0 0 24 24"><path d="M7 5 h10 l4 14 H3 Z"/><path d="M7 8.5 h10"/></symbol>
+<symbol id="p-vestido" viewBox="0 0 24 24"><path d="M9 3.6 L7 6 L9 9.4 L5.6 21 h12.8 L15 9.4 L17 6 L15 3.6 C15 5.6 13.7 6.4 12 6.4 C10.3 6.4 9 5.6 9 3.6 Z"/><path d="M9 9.4 h6"/></symbol>
+<symbol id="p-tenis" viewBox="0 0 24 24"><path d="M3 17 L3 12 C5 12 6.5 11 7.5 9.5 L9 11 L13 13 L19 15 C20.5 15.5 21 16 21 17 L21 19 H3 Z"/><path d="M3 17 h18"/><path d="M9 11 l1.5 1.6 M12 12.4 l1.5 1.6"/></symbol>
+<symbol id="p-bota" viewBox="0 0 24 24"><path d="M7 3 h5 l0.5 8 C13 13.5 15 14.2 18 15.2 C20 15.9 21 16.6 21 18 v2 H7 Z"/><path d="M7 20 h14"/><path d="M7.5 7 h4.6 M7.7 10 h4.7"/></symbol>
+<symbol id="p-sandalia" viewBox="0 0 24 24"><path d="M4.6 16.4 C4.6 15 5.6 14.2 7 14.2 h10 C18.4 14.2 19.4 15 19.4 16.4 C19.4 18.2 18 19.4 16.4 19.4 H7.6 C6 19.4 4.6 18.2 4.6 16.4 Z"/><path d="M7.4 14.2 L12 9.4 L16.6 14.2"/><path d="M9.6 11.9 h4.8"/><path d="M12 9.4 V7"/></symbol>
+<symbol id="p-meia" viewBox="0 0 24 24"><path d="M8 3 h6 v9 C14 14.5 15.5 15.5 17.5 16.5 C19.5 17.5 20 19 19 20.3 C18 21.6 16.3 21.5 15 20.5 L8 15.5 Z"/><path d="M8 6.5 h6"/></symbol>
+<symbol id="p-bone" viewBox="0 0 24 24"><path d="M4 15 C4 9 7.5 5.5 12 5.5 C16.5 5.5 20 9 20 15 Z"/><path d="M20 15 h2.5 C22.5 16.5 21.5 17.5 20 17.5 H4 v-2.5"/></symbol>
+<symbol id="p-gorro" viewBox="0 0 24 24"><path d="M5 16 C5 9.5 8.2 5.5 12 5.5 C15.8 5.5 19 9.5 19 16 Z"/><path d="M3.5 16 h17 v3 h-17 Z"/><path d="M12 3 v2.5"/></symbol>
+<symbol id="p-cachecol" viewBox="0 0 24 24"><path d="M6 4 C6 4 9 7 12 7 C15 7 18 4 18 4 L19.5 7 C19.5 7 16 10 12 10 C8 10 4.5 7 4.5 7 Z"/><path d="M9 10 L8 21 h4 L12.5 10"/><path d="M8 13.5 h4"/></symbol>
+<symbol id="p-luva" viewBox="0 0 24 24"><path d="M7.6 21 V11 a4.4 4.4 0 0 1 8.8 0 v10 Z"/><path d="M16.4 13.2 a2.1 2.1 0 0 1 2.9 3 L16.4 19"/><path d="M7.6 17.8 h8.8"/></symbol>
+<symbol id="p-oculos" viewBox="0 0 24 24"><path d="M2.5 9 h19 l-1 2.5 C20 14.5 17.5 15.5 15.5 14.5 C14 13.8 13.5 12 13.3 10.5 h-2.6 C10.5 12 10 13.8 8.5 14.5 C6.5 15.5 4 14.5 3.5 11.5 Z"/></symbol>
+<symbol id="p-guardachuva" viewBox="0 0 24 24"><path d="M2.5 12 C2.5 6.5 6.8 3 12 3 C17.2 3 21.5 6.5 21.5 12 C19.5 10.5 18 11 17 12 C16 11 14.5 10.5 12 12 C9.5 10.5 8 11 7 12 C6 11 4.5 10.5 2.5 12 Z"/><path d="M12 12 v6.5 C12 20 11 21 9.5 21 C8.3 21 7.5 20.2 7.5 19"/></symbol>
+<symbol id="p-mochila" viewBox="0 0 24 24"><path d="M8 6.4 h8 a3.2 3.2 0 0 1 3.2 3.2 v9 a2.4 2.4 0 0 1 -2.4 2.4 H7.2 a2.4 2.4 0 0 1 -2.4 -2.4 v-9 A3.2 3.2 0 0 1 8 6.4 Z"/><path d="M9.4 6.4 V5.2 a2.6 2.6 0 0 1 5.2 0 v1.2"/><path d="M8.4 14.6 h7.2"/></symbol>
+</defs></svg>
+
 <div class="aurora"></div>
 <div class="grain"></div>
 
@@ -2342,6 +2382,237 @@ function tlItem(it, d){
 }
 
 /* ---------------- Painéis laterais (estacionamento, transporte, dicas) ---------------- */
+/* ================= O QUE VESTIR =================
+   A recomendação sai da temperatura real do dia — a média de 4 anos da NASA
+   POWER que já aparece no cabeçalho — e não de um texto fixo por cidade: 20 °C
+   em Liubliana pedem a mesma roupa que 20 °C em Zurique.
+
+   São dois looks por dia porque a amplitude aqui chega a 12 °C: o que vestir no
+   frio da manhã e da noite (mínima) e o que vestir no calor da tarde (máxima).
+   Quem sai de casa às 7h com a roupa da tarde passa mal duas vezes.
+
+   As peças são desenhos SVG próprios, não fotos: o Wikimedia Commons só tem
+   peça de museu e as fotos de "look" de licença livre mostram pessoas
+   identificáveis. Desenho mostra o item, funciona offline e não pesa nada. */
+
+/* Catálogo: chave → [símbolo, rótulo curto, explicação no toque]. */
+const PECA = {
+  termica:    ['p-termica',    'Térmica',     'Camiseta térmica de manga longa, a segunda pele que segura o calor sem volume'],
+  mangalonga: ['p-mangalonga', 'Manga longa', 'Camiseta de manga longa — algodão grosso ou lã merino'],
+  camiseta:   ['p-camiseta',   'Camiseta',    'Camiseta de algodão'],
+  regata:     ['p-regata',     'Regata',      'Regata ou camiseta de tecido leve, que seca rápido'],
+  camisa:     ['p-camisa',     'Camisa',      'Camisa leve, aberta por cima da camiseta — vira casaco à noite e resolve restaurante mais arrumado'],
+  blusa:      ['p-blusa',      'Blusa',       'Blusa de manga curta ou 3/4'],
+  fleece:     ['p-fleece',     'Fleece',      'Fleece ou moletom com zíper: a camada do meio, que sai e volta fácil'],
+  cardiga:    ['p-fleece',     'Cardigã',     'Cardigã ou moletom aberto, para tirar quando o sol subir'],
+  cortavento: ['p-cortavento', 'Corta-vento', 'Corta-vento fino e impermeável — nos Alpes o vento tira mais graus que o termômetro mostra'],
+  calca:      ['p-calca',      'Calça',       'Calça comprida — jeans ou sarja'],
+  calcaleve:  ['p-calca',      'Calça leve',  'Calça de tecido leve ou linho, que protege do sol sem esquentar'],
+  bermuda:    ['p-bermuda',    'Bermuda',     'Bermuda ou short'],
+  saia:       ['p-saia',       'Saia',        'Saia leve na altura do joelho — passa em igreja sem problema'],
+  vestido:    ['p-vestido',    'Vestido',     'Vestido leve; se for visitar igreja no mesmo dia, prefira um que cubra os ombros'],
+  tenis:      ['p-tenis',      'Tênis',       'Tênis confortável e já amaciado — sapato novo em viagem é bolha garantida'],
+  bota:       ['p-bota',       'Bota',        'Bota ou tênis de cano alto, fechado e com sola de aderência'],
+  sandalia:   ['p-sandalia',   'Sandália',    'Sandália ou chinelo'],
+  meia:       ['p-meia',       'Meia',        'Meia grossa nos dias frios — e sempre um par de troca na mochila'],
+  bone:       ['p-bone',       'Boné',        'Boné ou chapéu — o sol de Madri em setembro ainda castiga'],
+  gorro:      ['p-gorro',      'Gorro',       'Gorro de lã; ocupa nada na mochila e muda o dia lá em cima'],
+  cachecol:   ['p-cachecol',   'Cachecol',    'Cachecol ou echarpe'],
+  lenco:      ['p-cachecol',   'Lenço',       'Lenço grande na mochila: cobre os ombros na porta da igreja e sai mais barato que o que vendem na fila'],
+  luva:       ['p-luva',       'Luva',        'Luva fina — mãos no volante e no celular agradecem'],
+  oculos:     ['p-oculos',     'Óculos',      'Óculos de sol; na neve e no lago a luz refletida cansa a vista'],
+  chuva:      ['p-guardachuva','Capa de chuva','Guarda-chuva compacto ou capa dobrável: nos Alpes a tarde fecha sem avisar'],
+  mochila:    ['p-mochila',    'Mochila',     'Mochila pequena para carregar a camada que sai quando o sol esquenta']
+};
+
+/* Faixas de frio, escolhidas pela MÍNIMA do dia (primeira que couber). */
+const FAIXA_FRIO = [
+  { ate:5, rot:'Frio de verdade',
+    nota:'Mínima média de {min} °C. Três camadas resolvem melhor que um casaco grosso: térmica por baixo, fleece no meio, corta-vento por cima — tira-se uma de cada vez conforme o dia esquenta.',
+    ele:['termica','mangalonga','fleece','cortavento','calca','meia','bota','gorro','luva'],
+    ela:['termica','blusa','fleece','cortavento','calca','meia','bota','gorro','cachecol'] },
+  { ate:10, rot:'Frio',
+    nota:'Mínima média de {min} °C ao amanhecer, e de novo assim que o sol se põe. Uma camada a mais do que a tarde pede.',
+    ele:['camiseta','fleece','cortavento','calca','tenis'],
+    ela:['blusa','fleece','cortavento','calca','tenis'] },
+  { ate:14, rot:'Fresco',
+    nota:'Mínima média de {min} °C. Um fleece por cima da camiseta dá conta; o corta-vento fica na mochila para o caso do vento.',
+    ele:['camiseta','fleece','calca','tenis'],
+    ela:['blusa','cardiga','calca','tenis'] },
+  { ate:99, rot:'Ameno',
+    nota:'Mínima média de {min} °C: nenhum casaco pesado sai da mala hoje. Uma camisa aberta por cima da camiseta segura a noite.',
+    ele:['camiseta','camisa','calca','tenis'],
+    ela:['blusa','camisa','calca','tenis'] }
+];
+
+/* Faixas de calor, escolhidas pela MÁXIMA do dia. */
+const FAIXA_CALOR = [
+  { de:28, rot:'Quente',
+    nota:'Máxima média de {max} °C, e nesta data o termômetro já chegou a {pico} °C nos últimos 4 anos. Tecido leve, garrafa cheia e sombra entre 14h e 17h.',
+    ele:['regata','bermuda','tenis','bone','oculos'],
+    ela:['regata','saia','sandalia','bone','oculos'] },
+  { de:24, rot:'Morno',
+    nota:'Máxima média de {max} °C — dia de manga curta, com a camada da manhã guardada na mochila.',
+    ele:['camiseta','bermuda','tenis','oculos'],
+    ela:['vestido','sandalia','oculos'] },
+  { de:19, rot:'Agradável',
+    nota:'Máxima média de {max} °C: manga curta com calça leve é o ponto certo para andar o dia inteiro sem suar nem sentir frio.',
+    ele:['camiseta','calcaleve','tenis','oculos'],
+    ela:['blusa','calcaleve','tenis','oculos'] },
+  { de:-99, rot:'Fresco mesmo na máxima',
+    nota:'A máxima média não passa de {max} °C. Aqui a tarde não "esquenta": a manga longa fica o dia todo e o corta-vento anda junto.',
+    ele:['mangalonga','calca','tenis','cortavento'],
+    ela:['blusa','calca','tenis','cortavento'] }
+];
+
+/* O que o roteiro do dia exige além da temperatura.
+   alto: [altitude do ponto, nome, altitude da cidade-base] — para converter a
+   média do vale no que se sente lá em cima. */
+const VESTE_CTX = {
+  '10/09': { voo:'a chegada em Madri' },
+  '11/09': { igreja:'na Catedral da Almudena' },
+  '12/09': { igreja:'no Duomo de Como e na Basílica de Sant’Abbondio', agua:'o Lago di Como' },
+  '14/09': { trilha:'Bagni di Masino → Cascata del Ferro', alto:[2113,'o Passo Splügen',1220] },
+  '18/09': { alto:[2239,'o Passo Pordoi',1224] },
+  '19/09': { trilha:'Rifugio Auronzo → Forcella Lavaredo', alto:[2320,'o mirante das Tre Cime',501] },
+  '20/09': { trilha:'a Garganta de Vintgar', agua:'o Lago Bled', igreja:'na igreja da ilha de Bled' },
+  '21/09': { caverna:['a Postojnska jama',10] },
+  '22/09': { agua:'a enseada de Mužilj' },
+  '24/09': { igreja:'na Basílica de San Marco' },
+  '25/09': { igreja:'no Duomo de Milão' },
+  '26/09': { voo:'o voo Milão → Madri' },
+  '28/09': { voo:'o voo de volta ao Brasil' }
+};
+
+/* Monta os dois looks e a lista do que vai na mochila. */
+function vesteDo(d){
+  const ctx  = VESTE_CTX[d.date] || {};
+  const frio = FAIXA_FRIO.find(f => d.tmin <= f.ate);
+  const calor= FAIXA_CALOR.find(f => d.tmax >= f.de);
+
+  const preencher = t => t.replace('{min}', d.tmin).replace('{max}', d.tmax).replace('{pico}', d.tamp[1]);
+  const maiuscula = t => t[0].toUpperCase() + t.slice(1);
+
+  const ele = frio.ele.slice(), ela = frio.ela.slice();
+  /* Abaixo de 8 °C o pescoço descoberto estraga o passeio, mesmo com casaco. */
+  if (d.tmin <= 7){
+    if (!ele.includes('cachecol')) ele.push('cachecol');
+    if (!ela.includes('cachecol')) ela.push('cachecol');
+  }
+
+  /* Mochila: o que não se veste, mas sem o que o dia trava. */
+  const bolsa = ['mochila'];
+  const notas = [];
+  const juntar = p => { if (!bolsa.includes(p)) bolsa.push(p); };
+
+  if (ctx.alto){
+    const [m, nome, base] = ctx.alto;
+    const laCima = Math.round(d.tmax - (m - base) * 0.0065);
+    notas.push(`<strong>${maiuscula(nome)}</strong> fica a ${m.toLocaleString('pt-BR')} m, ${(m-base).toLocaleString('pt-BR')} m acima do vale onde essa média foi medida. Pela regra dos 6,5 °C a cada 1.000 m, os ${d.tmax} °C da tarde viram uns <strong>${laCima} °C</strong> lá em cima — e o vento tira mais.`);
+    juntar('gorro'); juntar('cortavento'); juntar('chuva');
+  }
+  if (ctx.trilha){
+    notas.push(`Trilha hoje (${ctx.trilha}): tênis fechado e já amaciado, meia de troca na mochila e garrafa cheia. Sola lisa e chinelo ficam no carro.`);
+    juntar('meia'); juntar('chuva');
+  }
+  if (ctx.caverna){
+    const [nome, temp] = ctx.caverna;
+    notas.push(`${maiuscula(nome)} fica a ${temp} °C o ano inteiro, faça sol ou chova. O casaco entra na mochila mesmo com ${d.tmax} °C lá fora — e são quase duas horas lá dentro.`);
+    juntar('cortavento');
+  }
+  if (ctx.igreja){
+    notas.push(`Para entrar ${ctx.igreja} é preciso ombros e joelhos cobertos. Um lenço na mochila resolve na porta e custa menos que o que vendem na fila.`);
+    juntar('lenco');
+  }
+  if (ctx.agua){
+    notas.push(`${maiuscula(ctx.agua)} pede óculos de sol — a luz refletida na água cansa a vista em uma hora. Se der vontade de entrar, uma toalha fina e chinelo no porta-malas.`);
+    juntar('oculos'); juntar('sandalia');
+  }
+  if (ctx.voo){
+    notas.push(`Dia de avião (${ctx.voo}): vista as peças mais pesadas em vez de despachá-las — economiza mala e evita passar frio na cabine, que fica em torno de 22 °C mas com ar direto na nuca.`);
+  }
+  if (d.walk >= 10){
+    notas.push(`${d.walk} km a pé hoje. Tênis amaciado, meia de troca e um curativo na mochila: bolha se resolve antes de doer, não depois.`);
+    juntar('meia');
+  }
+
+  return { frio, calor, ele, ela, bolsa, notas, nFrio: preencher(frio.nota), nCalor: preencher(calor.nota) };
+}
+
+function pecaChip(k){
+  const p = PECA[k];
+  if (!p) return '';
+  return `<span class="peca" title="${p[2]}">
+    <svg class="pic" aria-hidden="true"><use href="#${p[0]}"></use></svg>
+    <span>${p[1]}</span></span>`;
+}
+
+function lookLinha(rot, ic, pecas){
+  return `<div class="min-w-0">
+    <div class="text-[10px] uppercase tracking-wide text-white/45 mb-1.5">
+      <i class="fa-solid ${ic} mr-1"></i>${rot}
+    </div>
+    <div class="flex flex-wrap gap-1.5">${pecas.map(pecaChip).join('')}</div>
+  </div>`;
+}
+
+function vesteBloco(v, d){
+  const bloco = (tipo, cor, ic, quando, temp, faixa, nota, ele, ela) => `
+    <div class="rounded-xl p-3" style="background:${cor.bg};border:1px solid ${cor.ed}">
+      <div class="flex items-center gap-2 flex-wrap mb-1.5">
+        <i class="fa-solid ${ic}" style="color:${cor.ic}"></i>
+        <span class="text-[11px] uppercase tracking-wide font-semibold" style="color:${cor.tx}">${quando} · ${temp} °C</span>
+        <span class="chip !py-0.5 !px-2 !text-[10px] ml-auto">${faixa}</span>
+      </div>
+      <p class="text-[11.5px] text-white/62 leading-relaxed mb-3">${nota}</p>
+      <div class="grid grid-cols-1 gap-3">
+        ${lookLinha('Look masculino','fa-person', ele)}
+        ${lookLinha('Look feminino','fa-person-dress', ela)}
+      </div>
+    </div>`;
+
+  return bloco('frio', {bg:'rgba(56,189,248,.09)', ed:'rgba(56,189,248,.28)', ic:'#7dd3fc', tx:'rgba(186,230,253,.9)'},
+               'fa-snowflake', 'Manhã e noite', d.tmin, v.frio.rot, v.nFrio, v.ele, v.ela)
+       + '<div class="h-2.5"></div>'
+       + bloco('calor', {bg:'rgba(251,191,36,.09)', ed:'rgba(251,191,36,.28)', ic:'#fcd34d', tx:'rgba(253,230,138,.9)'},
+               'fa-sun', 'Tarde', d.tmax, v.calor.rot, v.nCalor, v.calor.ele, v.calor.ela);
+}
+
+/* Painel recolhido: <details> nativo, então abre sem JS e o estado
+   sobrevive a qualquer re-render. */
+function vestePainel(d){
+  const v = vesteDo(d);
+  return `<section class="glass rounded-2xl overflow-hidden" style="border-color:rgba(167,139,250,.3)">
+    <details>
+      <summary class="tap flex items-center gap-3 p-4">
+        <i class="fa-solid fa-shirt text-violet-300 shrink-0"></i>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-display font-bold text-[13px] leading-tight">O que vestir em ${d.base}</h3>
+          <div class="text-[10.5px] text-white/45 mt-0.5">
+            Manhã ${d.tmin}° · tarde ${d.tmax}° — toque para abrir os looks
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-down caret text-white/40 text-[11px] shrink-0"></i>
+      </summary>
+      <div class="px-4 pb-4">
+        ${vesteBloco(v, d)}
+        <div class="divider my-3"></div>
+        <div class="text-[10px] uppercase tracking-wide text-white/45 mb-2">
+          <i class="fa-solid fa-bag-shopping mr-1"></i>Na mochila hoje
+        </div>
+        <div class="flex flex-wrap gap-1.5 mb-3">${v.bolsa.map(pecaChip).join('')}</div>
+        ${v.notas.length ? `<ul class="space-y-2">${v.notas.map(n=>`
+          <li class="flex gap-2 text-[11.5px] text-white/70 leading-relaxed">
+            <i class="fa-solid fa-caret-right text-violet-400/70 mt-1 shrink-0"></i><span>${n}</span></li>`).join('')}</ul>` : ''}
+        <p class="text-[10px] text-white/35 mt-3 leading-relaxed">
+          Baseado na média das máximas e mínimas desta data nos últimos 4 anos (NASA POWER),
+          não em previsão. Confira o tempo na véspera antes de fechar a mala do dia.
+        </p>
+      </div>
+    </details>
+  </section>`;
+}
+
 function sidePanels(d){
   const p = PARK[d.park], t = TIPS[d.tips];
   const tone = { rose:'rgba(244,63,94,.4)', amber:'rgba(251,191,36,.4)', sky:'rgba(56,189,248,.4)', mint:'rgba(52,211,153,.4)' }[p.c] || 'rgba(255,255,255,.16)';
@@ -2404,7 +2675,7 @@ function sidePanels(d){
     </div>
   </section>`;
 
-  return parking + transport + tips + quick;
+  return vestePainel(d) + parking + transport + tips + quick;
 }
 
 /* ---------------- Render do dia ---------------- */
