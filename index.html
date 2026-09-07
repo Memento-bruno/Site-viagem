@@ -176,11 +176,16 @@ if (window.tailwind) tailwind.config = {
   /* ---------- Utils ---------- */
   .txt-balance{ text-wrap:balance; }
   .divider{ height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent); }
-  details > summary{ list-style:none; cursor:pointer; }
-  details > summary::-webkit-details-marker{ display:none; }
-  details[open] .caret{ transform:rotate(180deg); }
-  .caret{ transition:transform .2s ease; }
   .safe-b{ padding-bottom:env(safe-area-inset-bottom); }
+  /* ---------- Barra de painéis auxiliares ---------- */
+  .aux-btn{
+    width:44px; height:44px; display:grid; place-items:center; font-size:16px;
+    border-radius:.8rem; border:1px solid var(--edge-soft);
+    background:rgba(255,255,255,.05); color:rgba(231,236,247,.6);
+    transition:background .18s ease, border-color .18s ease, color .18s ease;
+  }
+  .aux-btn:hover{ background:rgba(255,255,255,.1); color:rgba(231,236,247,.95); }
+  .aux-btn[aria-expanded="true"]{ color:var(--c); border-color:var(--ce); background:var(--cb); }
   /* ---------- Peças de roupa ---------- */
   .pic{
     width:26px; height:26px; fill:none; stroke:currentColor;
@@ -283,7 +288,7 @@ if (window.tailwind) tailwind.config = {
 
 <!-- ================= LAYOUT PRINCIPAL ================= -->
 <div class="max-w-[1800px] mx-auto px-3 sm:px-5 lg:px-8 py-4 md:py-6">
-  <div class="grid grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_340px] gap-4 lg:gap-6 items-start">
+  <div class="grid grid-cols-1 md:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)] gap-4 lg:gap-6 items-start">
 
     <!-- ---------- SIDEBAR DIAS (desktop) ---------- -->
     <aside class="hidden md:block sticky top-[92px]">
@@ -302,15 +307,11 @@ if (window.tailwind) tailwind.config = {
     </aside>
 
     <!-- ---------- PAINEL PRINCIPAL ---------- -->
-    <main id="mainPanel" class="min-w-0 space-y-4 md:space-y-5"></main>
-
-    <!-- ---------- PAINEL LATERAL SECUNDÁRIO (desktop XL) ---------- -->
-    <aside id="sidePanel" class="hidden xl:block sticky top-[92px] space-y-4 max-h-[calc(100dvh-110px)] overflow-y-auto thin-scroll pr-1"></aside>
+    <!-- Largura travada em 1200 px: sem a coluna da direita, uma tela de 1800 px
+         esticaria as linhas do cronograma além do confortável para ler. -->
+    <main id="mainPanel" class="min-w-0 w-full xl:max-w-[1200px] xl:mx-auto space-y-4 md:space-y-5"></main>
 
   </div>
-
-  <!-- ---------- Painéis extras no MOBILE/TABLET (abaixo da timeline) ---------- -->
-  <div id="sidePanelMobile" class="xl:hidden mt-4 space-y-4"></div>
 
   <footer class="mt-10 mb-6 text-center text-[11px] text-white/35 safe-b">
     <p class="mb-1"><i class="fa-solid fa-circle-info mr-1"></i> Horários, preços e disponibilidade são estimativas — confirme reservas e funcionamento antes de cada dia.</p>
@@ -2578,23 +2579,15 @@ function vesteBloco(v, d){
                'fa-sun', 'Tarde', d.tmax, v.calor.rot, v.nCalor, v.calor.ele, v.calor.ela);
 }
 
-/* Painel recolhido: <details> nativo, então abre sem JS e o estado
-   sobrevive a qualquer re-render. */
+/* Conteúdo do painel de roupas. Quem esconde e mostra é a barra de ícones. */
 function vestePainel(d){
   const v = vesteDo(d);
-  return `<section class="glass rounded-2xl overflow-hidden" style="border-color:rgba(167,139,250,.3)">
-    <details>
-      <summary class="tap flex items-center gap-3 p-4">
-        <i class="fa-solid fa-shirt text-violet-300 shrink-0"></i>
-        <div class="min-w-0 flex-1">
-          <h3 class="font-display font-bold text-[13px] leading-tight">O que vestir em ${d.base}</h3>
-          <div class="text-[10.5px] text-white/45 mt-0.5">
-            Manhã ${d.tmin}° · tarde ${d.tmax}° — toque para abrir os looks
-          </div>
-        </div>
-        <i class="fa-solid fa-chevron-down caret text-white/40 text-[11px] shrink-0"></i>
-      </summary>
-      <div class="px-4 pb-4">
+  return `<section class="glass rounded-2xl p-4" style="border-color:rgba(167,139,250,.3)">
+      <h3 class="font-display font-bold text-[13px] flex items-center gap-2">
+        <i class="fa-solid fa-shirt text-violet-300"></i>O que vestir em ${d.base}
+      </h3>
+      <div class="text-[10.5px] text-white/45 mt-0.5 mb-3">Manhã ${d.tmin}° · tarde ${d.tmax}°</div>
+      <div>
         ${vesteBloco(v, d)}
         <div class="divider my-3"></div>
         <div class="text-[10px] uppercase tracking-wide text-white/45 mb-2">
@@ -2609,7 +2602,6 @@ function vestePainel(d){
           não em previsão. Confira o tempo na véspera antes de fechar a mala do dia.
         </p>
       </div>
-    </details>
   </section>`;
 }
 
@@ -2675,7 +2667,52 @@ function sidePanels(d){
     </div>
   </section>`;
 
-  return vestePainel(d) + parking + transport + tips + quick;
+  return { veste: vestePainel(d), parking, transport, tips, quick };
+}
+
+/* ---------------- Barra de painéis auxiliares ----------------
+   Cinco seções que antes ocupavam a coluna da direita — e que no celular
+   ficavam no fim da página, depois de rolar o cronograma inteiro. Agora são
+   cinco ícones no topo: o conteúdo só aparece quando se toca em um deles,
+   e um de cada vez, para não empurrar o dia para baixo sem necessidade. */
+const AUX = [
+  { id:'veste',     ic:'fa-shirt',          rot:'O que vestir',            cor:'#c4b5fd', ce:'rgba(167,139,250,.55)', cb:'rgba(167,139,250,.14)' },
+  { id:'parking',   ic:'fa-square-parking', rot:'Estacionamento e leis',   cor:'#7dd3fc', ce:'rgba(56,189,248,.55)',  cb:'rgba(56,189,248,.14)' },
+  { id:'transport', ic:'fa-route',          rot:'Transporte',              cor:'#6ee7b7', ce:'rgba(52,211,153,.55)',  cb:'rgba(52,211,153,.14)' },
+  { id:'tips',      ic:'fa-heart',          rot:'Coração dos locais',      cor:'#fda4af', ce:'rgba(244,63,94,.55)',   cb:'rgba(244,63,94,.14)' },
+  { id:'quick',     ic:'fa-bolt',           rot:'Links rápidos',           cor:'#fcd34d', ce:'rgba(251,191,36,.55)',  cb:'rgba(251,191,36,.14)' }
+];
+
+/* Qual painel está aberto. Fica fora do render para sobreviver à troca de dia:
+   quem abriu "estacionamento" em Como quer vê-lo de novo em Sondrio. */
+let auxAberto = null;
+
+function montarAux(d){
+  const botoes = AUX.map(a => `
+    <button type="button" data-aux="${a.id}" class="tap aux-btn"
+            style="--c:${a.cor};--ce:${a.ce};--cb:${a.cb}"
+            aria-expanded="${auxAberto === a.id}" aria-controls="auxConteudo"
+            title="${a.rot}" aria-label="${a.rot}">
+      <i class="fa-solid ${a.ic}"></i>
+    </button>`).join('');
+
+  const atual = AUX.find(a => a.id === auxAberto);
+  /* Só monta o painel que está aberto — no estado normal, que é fechado,
+     não se paga nada por nenhum dos cinco. */
+  const conteudo = atual ? sidePanels(d)[atual.id] : '';
+  $('#auxBar').innerHTML = `
+    <div class="glass rounded-2xl p-2 flex items-center gap-2 flex-wrap">
+      ${botoes}
+      <span class="text-[11px] leading-tight px-1 ${atual ? 'text-white/70' : 'text-white/35'}">
+        ${atual ? atual.rot : 'Toque num ícone para abrir'}
+      </span>
+    </div>
+    <div id="auxConteudo" class="${atual ? 'mt-4' : ''}">${conteudo}</div>`;
+
+  $$('#auxBar [data-aux]').forEach(b => b.addEventListener('click', () => {
+    auxAberto = (auxAberto === b.dataset.aux) ? null : b.dataset.aux;
+    montarAux(d);
+  }));
 }
 
 /* ---------------- Render do dia ---------------- */
@@ -2877,6 +2914,9 @@ function renderDay(i){
     ${groups}
   </section>`;
 
+  /* Barra de ícones dos painéis auxiliares — preenchida por montarAux */
+  const auxBar = `<section id="auxBar" class="fade-up"></section>`;
+
   /* Navegação anterior/próximo */
   const nav = `<div class="flex gap-2.5 fade-up">
     <button ${i===0?'disabled':''} data-go="${i-1}"
@@ -2891,11 +2931,9 @@ function renderDay(i){
     </button>
   </div>`;
 
-  $('#mainPanel').innerHTML = head + hotelCard + alerts + gastos + timeline + nav;
+  $('#mainPanel').innerHTML = auxBar + head + hotelCard + alerts + gastos + timeline + nav;
 
-  const panels = sidePanels(d);
-  $('#sidePanel').innerHTML = panels;
-  $('#sidePanelMobile').innerHTML = `<div class="grid md:grid-cols-2 gap-4">${panels}</div>`;
+  montarAux(d);
 
   const inpCambio = $('#taxaCambio');
   if (inpCambio) inpCambio.addEventListener('change', e => setCambio(parseFloat(e.target.value)));

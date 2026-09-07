@@ -160,10 +160,28 @@ O campo `q` é a chave que amarra tudo: gera o link do Maps, indexa a foto em
 
 ### Layout
 
-Três colunas no desktop (etapas, painel principal, informações de apoio), coluna
-única no celular com os painéis de apoio abaixo do cronograma. Estética
-*glassmorphism* sobre gradiente escuro, pensada para leitura sob sol forte. Alvos
-de toque de no mínimo 44 px.
+Duas colunas no desktop (etapas e painel principal), coluna única no celular.
+Estética *glassmorphism* sobre gradiente escuro, pensada para leitura sob sol
+forte. Alvos de toque de no mínimo 44 px.
+
+O painel principal é travado em 1.200 px: sem a antiga coluna da direita, uma
+tela de 1.800 px esticaria as linhas do cronograma além do confortável para ler.
+
+### Barra de painéis auxiliares
+
+Cinco ícones no topo do dia — roupas, estacionamento, transporte, etiqueta local
+e links rápidos. Cada um abre a sua seção logo abaixo, um de cada vez; tocar no
+ícone aberto fecha.
+
+Antes essas seções ocupavam uma terceira coluna no desktop e, no celular,
+ficavam depois do cronograma inteiro — quem quisesse a regra de estacionamento
+rolava a página toda para achá-la. Como são consulta pontual e não leitura
+contínua, o custo certo é um toque, não uma rolagem.
+
+O painel aberto sobrevive à troca de dia: quem abriu "estacionamento" em Como
+quer vê-lo de novo em Sondrio. O rótulo do painel aberto aparece ao lado dos
+ícones, já que ícone sozinho não diz o que é; fechado, a barra convida com
+"toque num ícone para abrir".
 
 ### Luz do dia
 
@@ -191,8 +209,7 @@ o site oficial. Os 10 com horário marcado ficam destacados em âmbar.
 
 ### O que vestir
 
-Painel recolhido na coluna lateral, um por dia. Fechado mostra só a cidade e as
-duas temperaturas; abre no toque e revela dois looks (masculino e feminino) para
+Primeiro ícone da barra auxiliar. Abre com dois looks (masculino e feminino) para
 o frio da manhã e para o calor da tarde, mais a lista do que vai na mochila.
 Detalhado em [Recomendação de roupas](#recomendação-de-roupas).
 
@@ -326,9 +343,8 @@ acompanham a cor do tema e mostram *o item* em vez de uma pessoa aleatória.
 
 ### Implementação
 
-`<details>` nativo: abre sem JavaScript, fecha sozinho ao trocar de dia (o
-painel é reconstruído) e não precisa de estado. O `summary` é o botão; o
-conteúdo só existe expandido.
+O conteúdo vive na barra de painéis auxiliares: o HTML só é montado quando o
+ícone está ativo, então um dia fechado não paga nada por ele.
 
 
 ## Dados externos e como foram obtidos
@@ -406,11 +422,12 @@ Toda alteração passa pela mesma bateria, executada em Chromium via Playwright:
 |---|---|
 | Sintaxe | `node --check` no JS extraído e no service worker |
 | Integridade dos dados | 19 dias, chaves válidas, refeições com as duas opções |
-| Overflow horizontal | 8 larguras (320 a 1920 px) × 19 dias |
+| Overflow horizontal | 9 larguras (320 a 1920 px) × 19 dias, com cada painel auxiliar aberto |
 | Links | formato, hosts e ausência de `<a>` aninhado |
 | Imagens | miniaturas renderizadas e nenhuma quebrada |
 | Runtime | nenhum erro de JavaScript |
-| Painel de roupas | fecha por padrão, abre no clique e chega a ≥ 300 px em 19 dias × 8 larguras; todo chip com rótulo, explicação e desenho renderizado |
+| Painéis auxiliares | fechados por padrão; cada um dos 5 abre no clique, fecha no segundo clique, nunca dois ao mesmo tempo, e sobrevive à troca de dia — 19 dias × 9 larguras |
+| Peças de roupa | todo chip com rótulo, explicação e desenho renderizado; nenhum `<use>` órfão |
 | Offline | rede cortada, recarga, navegação entre dias |
 
 A publicação é confirmada por comparação de hash entre o arquivo local e o que o
